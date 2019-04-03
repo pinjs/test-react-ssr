@@ -1,0 +1,24 @@
+{
+  "name": "test-react-ssr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "bin/krs dev",
+    "start": "bin/krs start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "krs": "./bin/krs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "arg": "^4.1.0",
+    "chokidar-cli": "^1.2.2",
+    "cross-spawn": "^6.0.5",
+    "koa": "2.7.0",
+    "koa-router": "7.4.0"
+  }
+}

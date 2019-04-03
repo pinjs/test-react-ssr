@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+const path = require('path');
+const env = require('./env');
+const utils = require('./utils');
+
+(!env.currentCommand && env.args['--help']) && require('./cmds/help');
+
+let proc = utils.startProcess();
+process.on('SIGINT', utils.killProcess(proc));
+process.on('SIGTERM', utils.killProcess(proc));
+process.on('exit', utils.killProcess(proc));
+utils.watchDev(proc);
