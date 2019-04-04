@@ -1,20 +1,24 @@
 const Koa = require('koa');
+const serve = require('koa-static');
 const Router = require('koa-router');
-const core = require('./libs/core');
-
+const PinView = require('@pinjs/view');
+const config = require('./config.pin');
 const app = new Koa();
 const router = new Router();
 
-router.get('*', async (ctx, next) => {
-    // await handler(ctx.path, ctx.query);
-    ctx.body = 'body pppl';
-});
-
-app
-    .use(router.routes())
-    .use(router.allowedMethods());
-app.listen(3000, () => console.log('App listening on port 3000'));
-
 (async () => {
-    const handler = await core.getHandler();
+    try {
+        const view = new PinView(config);
+        await view.init();
+
+        router.get('*', async (ctx, next) => {
+            await view.render(ctx.req, ctx.res, ctx.path, ctx.query);
+        });
+
+        app.use(serve('./public'));
+        app.use(router.routes()).use(router.allowedMethods());
+        app.listen(3000, () => console.log('Ready at 3000'));
+    } catch (e) {
+        console.error(e);
+    }
 })();

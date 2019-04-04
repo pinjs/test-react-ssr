@@ -4,21 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "bin/krs dev",
-    "start": "bin/krs start",
+    "dev": "nodemon server.js",
+    "start": "pinview start",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "bin": {
-    "krs": "./bin/krs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "arg": "^4.1.0",
-    "chokidar-cli": "^1.2.2",
-    "cross-spawn": "^6.0.5",
+    "@pinjs/view": "file:packages/@pinjs/view",
+    "clean-webpack-plugin": "^2.0.1",
     "koa": "2.7.0",
-    "koa-router": "7.4.0"
+    "koa-router": "7.4.0",
+    "koa-static": "^5.0.0"
   }
 }
