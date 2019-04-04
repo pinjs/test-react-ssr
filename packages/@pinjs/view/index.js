@@ -10,6 +10,7 @@ class PinView {
             serverOutputDir: path.join(process.cwd(), 'build/server'),
         }, config || {});
 
+        this.SSRBundleManifest = require(this.config.serverOutputDir + '/react-loadable-manifest.json');
         this.SSRBuildpath = this.config.serverOutputDir;
         this.SSRBuildClass = null;
         this.SSRBuild = null;
@@ -25,8 +26,7 @@ class PinView {
     }
 
     async render(req, res, pagePath, query) {
-        const bundleManifest = require(this.config.serverOutputDir + '/react-loadable-manifest.json');
-        const rendered = this.SSRBuild.render(pagePath, {}, bundleManifest);
+        const rendered = this.SSRBuild.render(pagePath, {}, this.SSRBundleManifest);
 
         res.end(`
         <!doctype html>

@@ -5,6 +5,10 @@ const ProgressPlugin = require('webpack/lib/ProgressPlugin');
 const webpackConfigClient = require('./webpack-config-client');
 const webpackConfigServer = require('./webpack-config-server');
 
+const getPageList = async (pageDir, pages) => {
+
+}
+
 const build = async webpackConfig => {
     return new Promise((resolve, reject) => {
         const compiler = webpack(webpackConfig);
