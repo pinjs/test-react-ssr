@@ -12,6 +12,7 @@ const router = new Router();
         await view.init();
 
         router.get('*', async (ctx, next) => {
+            ctx.status = 200;
             await view.render(ctx.req, ctx.res, ctx.path, ctx.query);
         });
 

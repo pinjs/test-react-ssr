@@ -1,14 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
-import AppRoutes from '../shared/AppRoutes';
+import { Provider } from 'react-redux';
+import Loadable from 'react-loadable';
+import createReduxStore from '../shared/createReduxStore';
+import ComponentLoader from '../shared/ComponentLoader';
+import Routing from './routing';
 
-const App = () => {
-    return (
-        <BrowserRouter>
-            <AppRoutes />
-        </BrowserRouter>
-    );
-};
+const preloadedState = window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
+delete window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
+const store = createReduxStore({ preloadedState });
 
-ReactDOM.render(<App />, document.getElementById('app'));
+ComponentLoader.getPagesMap().then(() => {
+    Loadable.preloadReady().then(() => {
+        ReactDOM.hydrate(
+            <Provider store={store}>
+                <BrowserRouter>
+                    <Routing />
+                </BrowserRouter>
+            </Provider>,
+            document.getElementById('app')
+        );
+    })
+});
+

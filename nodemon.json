@@ -2,7 +2,8 @@
     "verbose": false,
     "ignore": ["node_modules", "build"],
     "watch": [
-        "server.js"
+        "server.js",
+        "packages/*"
     ],
     "ext": "js json"
 }

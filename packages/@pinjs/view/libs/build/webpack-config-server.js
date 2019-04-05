@@ -30,7 +30,7 @@ const getConfigs = config => {
         },
         module: {
             rules: [{
-                test: /\.jsx?$/,
+                test: /\.(js|jsx)?$/,
                 exclude: /(node_modules|bower_components|public\/)/,
                 use: {
                     loader: 'babel-loader',
@@ -44,6 +44,7 @@ const getConfigs = config => {
                             require('@babel/plugin-proposal-class-properties'),
                             require('@babel/plugin-proposal-object-rest-spread'),
                             require('@babel/plugin-syntax-dynamic-import'),
+                            require('@babel/plugin-transform-runtime'),
                             require('react-loadable/babel'),
                         ],
                     },
@@ -73,6 +74,8 @@ const getConfigs = config => {
             }),
             new webpack.DefinePlugin({
                 OUTPUT_DIR: JSON.stringify(config.serverOutputDir),
+                PIN_VIEW_DIR: JSON.stringify(path.join(process.cwd(), '.pinjs', 'view')),
+                IS_SERVER: JSON.stringify(true),
             }),
             new CleanWebpackPlugin({
                 dry: true,
@@ -81,14 +84,14 @@ const getConfigs = config => {
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
-            new webpack.NamedChunksPlugin(function(chunk) {
-                if (chunk.name) return chunk.name;
-                for (var m of chunk._modules) {
-                    if (sourceRegex.test(m.context)) {
-                        return path.basename(m.rawRequest);
-                    }
-                }
-            })
+            // new webpack.NamedChunksPlugin(function(chunk) {
+            //     if (chunk.name) return chunk.name;
+            //     for (var m of chunk._modules) {
+            //         if (sourceRegex.test(m.context)) {
+            //             return path.basename(m.rawRequest);
+            //         }
+            //     }
+            // })
         ],
     }
 
