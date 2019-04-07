@@ -17,18 +17,23 @@ class ComponentLoader extends React.Component {
     }
 
     componentWillMount() {
-        console.log('will mount')
         let pathname = this.props.location.pathname;
         pathname = pathname.substring(1);
         let Component = ComponentLoader.PagesMap[pathname] || (() => <div>Not found</div>);
         this.setState({ Component });
-        console.log('will mount')
+    }
+
+    componentWillReceiveProps(props) {
+        let pathname = props.location.pathname;
+        pathname = pathname.substring(1);
+        let Component = ComponentLoader.PagesMap[pathname] || (() => <div>Not found</div>);
+        this.setState({ Component });
     }
 
     render() {
         let { Component } = this.state;
         return (
-            <Component />
+            <Component location={this.props.location} />
         )
     }
 }

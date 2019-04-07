@@ -9,11 +9,10 @@ const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 
 const getConfigs = config => {
     let webpackConfig = {
+        watch: true,
         mode: isDevMode ? 'development' : 'production',
         target: 'web',
-        entry: {
-            index: entryIndex,
-        },
+        entry: [entryIndex],
         devtool: 'cheap-module-eval-source-map',
         output: {
             publicPath: config.publicPath,

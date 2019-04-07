@@ -30,6 +30,7 @@
     "cssnano": "^4.1.10",
     "fast-glob": "^2.2.6",
     "fs-extra": "^7.0.1",
+    "koa-webpack": "^5.2.2",
     "mini-css-extract-plugin": "^0.5.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "react": "^16.8.6",
@@ -46,10 +47,11 @@
     "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
+    "webpack-dev-middleware": "^3.6.2",
+    "webpack-hot-client": "^4.1.1",
     "webpack-node-externals": "^1.7.2"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {}
+  "license": "ISC"
 }

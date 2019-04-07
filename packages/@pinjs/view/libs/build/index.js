@@ -82,11 +82,26 @@ const buildClient = async config => {
 }
 
 const buildServer = async config => {
-    // mkdirp.sync(config.serverOutputDir);
+    mkdirp.sync(config.serverOutputDir);
     let pages = await getPageList(config.pageDir, []);
     let webpackConfig = webpackConfigServer.getConfigs(config);
     await build(webpackConfig);
 }
 
+const getWebpackConfigs = async config => {
+    await getPageList(config.pageDir, []);
+    let webpackClientConfig = webpackConfigClient.getConfigs(config);
+    let webpackServerConfig = webpackConfigServer.getConfigs(config);
+
+    return [webpackClientConfig, webpackServerConfig];
+}
+
+const getWebpackClientConfig = async config => {
+    await getPageList(config.pageDir, []);
+    return webpackConfigClient.getConfigs(config);
+}
+
 exports.buildClient = buildClient;
 exports.buildServer = buildServer;
+exports.getWebpackConfigs = getWebpackConfigs;
+exports.getWebpackClientConfig = getWebpackClientConfig;

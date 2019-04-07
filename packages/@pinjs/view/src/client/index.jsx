@@ -11,15 +11,17 @@ const preloadedState = window.__PRELOADED_STATE__; // eslint-disable-line no-und
 delete window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
 const store = createReduxStore({ preloadedState });
 
+
 ComponentLoader.getPagesMap().then(() => {
     Loadable.preloadReady().then(() => {
+        const appRoot = document.getElementById('app');
         ReactDOM.hydrate(
             <Provider store={store}>
                 <BrowserRouter>
                     <Routing />
                 </BrowserRouter>
             </Provider>,
-            document.getElementById('app')
+            appRoot
         );
     })
 });
