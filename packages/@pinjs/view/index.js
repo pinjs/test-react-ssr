@@ -24,7 +24,7 @@ class PinView {
         await build.buildServer(this.config);
 
         this.SSRBundleManifest = require(this.config.clientOutputDir + '/react-loadable-manifest.json');
-        this.SSRBuildClass = require(this.SSRBuildpath);
+        this.SSRBuildClass = require(this.SSRBuildpath + '/main.js');
         await this.SSRBuildClass.preload();
         this.SSRBuild = new this.SSRBuildClass(this.config);
     }
@@ -83,7 +83,6 @@ class PinView {
                 logLevel: 'silent'
             },
         }, options || {});
-        console.log(options)
 
         let webpackConfig = await build.getWebpackConfigs(this.config);
         let compiler = webpack(webpackConfig);
