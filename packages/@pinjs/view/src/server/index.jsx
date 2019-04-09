@@ -55,4 +55,10 @@ class SSR {
     }
 }
 
+if (module.hot) {
+    module.hot.accept(function() {
+        console.log('Error handler')
+    });
+}
+
 export default SSR;

@@ -11,7 +11,6 @@ const preloadedState = window.__PRELOADED_STATE__; // eslint-disable-line no-und
 delete window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
 const store = createReduxStore({ preloadedState });
 
-
 ComponentLoader.getPagesMap().then(() => {
     Loadable.preloadReady().then(() => {
         const appRoot = document.getElementById('app');
@@ -23,6 +22,11 @@ ComponentLoader.getPagesMap().then(() => {
             </Provider>,
             appRoot
         );
-    })
+    });
 });
 
+if (module.hot) {
+    module.hot.accept(function() {
+        console.log('Error handler')
+    });
+}

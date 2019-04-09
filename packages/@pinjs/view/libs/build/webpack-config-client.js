@@ -73,8 +73,8 @@ const getConfigs = config => {
                 IS_SERVER: JSON.stringify(false),
             }),
             new CleanWebpackPlugin({
-                dry: true,
-                verbose: true,
+                dry: false,
+                verbose: false,
                 cleanStaleWebpackAssets: true,
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
