@@ -29,9 +29,11 @@ class PinView {
         this.SSRBuild = new this.SSRBuildClass(this.config);
     }
 
-    async init() {
-        await build.buildClient(this.config);
-        await build.buildServer(this.config);
+    async init(rebuild = true) {
+        if (rebuild) {
+            await build.buildClient(this.config);
+            await build.buildServer(this.config);
+        }
         await this.loadSSRBuild();
     }
 
@@ -100,9 +102,9 @@ class PinView {
 
         const serverCompiler = compiler.compilers[1];
         serverCompiler.hooks.watchRun.tapAsync('pinjsView', (_compiler, done) => {
-            const { watchFileSystem } = _compiler;
+            const watchFileSystem = _compiler.watchFileSystem;
             const watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
-            console.log('File updated: ', Object.keys(watcher.mtimes)[0]);
+            console.log('File updated bhihi: ', Object.keys(watcher.mtimes)[0]);
             return done();
         });
         serverCompiler.hooks.done.tapAsync('pinjsView', async (_compiler, done) => {
@@ -118,6 +120,10 @@ class PinView {
     }
 
     async render(req, res, pagePath, query) {
+        if (pagePath == '/favicon.ico') {
+            return res.end('ok');
+        }
+
         const rendered = await this.SSRBuild.render(pagePath, {}, this.SSRBundleManifest);
         res.end(`<!doctype html><html lang="en"><head>${rendered.cssFiles.map(file => `<link rel="stylesheet" href="${file}" />`)}</head><body><div id="app">${rendered.html}</div>${rendered.jsScripts.join('\n')}</body></html>`);
     }

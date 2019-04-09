@@ -34,7 +34,9 @@ const searchCache = (moduleName, callback) => {
             // Go over each of the module's children and
             // traverse them
             mod.children.forEach(function (child) {
-                traverse(child);
+                if (!/node_modules/.test(child.filename)) {
+                    traverse(child);
+                }
             });
 
             // Call the specified callback providing the
