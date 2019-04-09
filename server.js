@@ -19,7 +19,7 @@ const router = new Router();
 
         app.use(serve('./public'));
         app.use(router.routes()).use(router.allowedMethods());
-        app.listen(3000, () => console.log('Ready at 3000'));
+        app.listen(3000, () => console.log('Application running on port 3000'));
     } catch (e) {
         console.error(e);
     }

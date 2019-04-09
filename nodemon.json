@@ -3,6 +3,7 @@
     "ignore": ["node_modules", "build"],
     "watch": [
         "server.js",
+        "config.pin.js",
         "packages/*"
     ],
     "ext": "js json"

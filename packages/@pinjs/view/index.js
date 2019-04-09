@@ -4,6 +4,7 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotClient = require('webpack-hot-client');
 const build = require('./libs/build');
 const utils = require('./libs/utils');
+const logger = require('./libs/logger');
 
 class PinView {
     constructor(config) {
@@ -102,9 +103,12 @@ class PinView {
 
         const serverCompiler = compiler.compilers[1];
         serverCompiler.hooks.watchRun.tapAsync('pinjsView', (_compiler, done) => {
-            const watchFileSystem = _compiler.watchFileSystem;
-            const watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
-            console.log('File updated bhihi: ', Object.keys(watcher.mtimes)[0]);
+            let watchFileSystem = _compiler.watchFileSystem;
+            let watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
+            let updatedFile = Object.keys(watcher.mtimes)[0];
+            if (!updatedFile.startsWith(path.join(process.cwd(), '.pinjs', 'view'))) {
+                logger.info('> File updated: ' + Object.keys(watcher.mtimes)[0]);
+            }
             return done();
         });
         serverCompiler.hooks.done.tapAsync('pinjsView', async (_compiler, done) => {
