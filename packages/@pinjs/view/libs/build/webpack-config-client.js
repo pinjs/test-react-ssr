@@ -10,7 +10,9 @@ const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 const getConfigs = config => {
     let webpackConfig = {
         watch: true,
+        cache: false,
         mode: isDevMode ? 'development' : 'production',
+        name: 'client',
         target: 'web',
         entry: [entryIndex],
         devtool: 'cheap-module-eval-source-map',
@@ -75,7 +77,7 @@ const getConfigs = config => {
             new CleanWebpackPlugin({
                 dry: false,
                 verbose: false,
-                cleanStaleWebpackAssets: true,
+                cleanStaleWebpackAssets: false,
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),

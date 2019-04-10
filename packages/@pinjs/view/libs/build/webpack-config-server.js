@@ -11,7 +11,9 @@ const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 const getConfigs = config => {
     let webpackConfig = {
         watch: true,
+        cache: false,
         mode: isDevMode ? 'development' : 'production',
+        name: 'server',
         target: 'node',
         entry: [entryIndex],
         devtool: 'source-map',

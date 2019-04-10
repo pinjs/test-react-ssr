@@ -49,7 +49,8 @@ const build = async (webpackConfig, label) => {
                 modulepath = modulepath ? ' …' + modulepath.substr(modulepath.length - 30) : '';
                 current = current ? ' ' + current : '';
                 active = active ? ' ' + active : '';
-                process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${msg + current + active + modulepath} `);
+                // process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${msg + current + active + modulepath} `);
+                process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${active + path.basename(modulepath)} `);
                 process.stdout.clearLine(1);
             } else if (percentage === 1) {
                 process.stdout.cursorTo(0);

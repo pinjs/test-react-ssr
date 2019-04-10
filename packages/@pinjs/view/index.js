@@ -85,33 +85,41 @@ class PinView {
                 serverSideRender: true,
                 publicPath: this.config.publicPath,
                 logLevel: 'silent',
+                watchOptions: {
+                    // ignored: /view\/pages\.jsx/
+                }
             },
             hotClient: {
-                logLevel: 'silent'
+                port: 44297,
+                reload: true,
+                // logLevel: 'silent'
             },
         }, options || {});
 
         const webpackConfig = await build.getWebpackConfigs(this.config);
         const compiler = webpack(webpackConfig);
-        const hotClient = await this.getClient(compiler, options);
+        const clientCompiler = compiler.compilers[0];
+        const serverCompiler = compiler.compilers[1];
         const devMiddleware = webpackDevMiddleware(compiler, options.devMiddleware);
         const middleware = this.getMiddleware(compiler, devMiddleware);
+        const hotClient = await this.getClient(compiler, options);
         const close = (callback) => {
             const next = hotClient ? () => hotClient.close(callback) : callback;
             devMiddleware.close(next);
         };
 
-        const serverCompiler = compiler.compilers[1];
         serverCompiler.hooks.watchRun.tapAsync('pinjsView', (_compiler, done) => {
             let watchFileSystem = _compiler.watchFileSystem;
             let watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
             let updatedFile = Object.keys(watcher.mtimes)[0];
+
             if (!updatedFile.startsWith(path.join(process.cwd(), '.pinjs', 'view'))) {
-                logger.info('> File updated: ' + Object.keys(watcher.mtimes)[0]);
+                logger.info('> File updated: ' + updatedFile);
             }
             return done();
         });
-        serverCompiler.hooks.done.tapAsync('pinjsView', async (_compiler, done) => {
+        serverCompiler.hooks.done.tapAsync('pinjsView', async (stats, done) => {
+            console.log('hooks.done.tapAsync');
             await this.loadSSRBuild();
             return done();
         });
