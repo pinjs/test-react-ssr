@@ -26,7 +26,8 @@ ComponentLoader.getPagesMap().then(() => {
 });
 
 if (module.hot) {
-    module.hot.accept(function() {
-        console.log('Error handler')
+    module.hot.accept();
+    module.hot.dispose(function() {
+        console.log('dispose')
     });
 }

@@ -8,7 +8,7 @@ export default class ContactPage extends React.Component {
     render() {
         return (
             <div>
-                This is About page 50<br />
+                This is About page 89<br />
                 <Link to="/home/index">Home</Link><br />
                 <Link to="/contact">Contact</Link><br />
             </div>

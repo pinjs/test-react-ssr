@@ -2,7 +2,7 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 import { Switch, Route } from 'react-router';
 import { getBundles } from 'react-loadable-ssr-addon';
-import { Provider } from 'react-redux'
+import { Provider } from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';

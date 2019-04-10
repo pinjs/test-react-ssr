@@ -39,29 +39,29 @@ const getPageList = async (pageDir, pages = []) => {
     fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${pageImport.join('\n')};const pagesMap = {${pageComponentContent.join(',')}};export default pagesMap;`);
 }
 
-const build = async (webpackConfig, label) => {
+const build = async (webpackConfig, label, compiler = null) => {
     return new Promise((resolve, reject) => {
-        const compiler = webpack(webpackConfig);
+        compiler = compiler || webpack(webpackConfig);
 
-        new webpack.ProgressPlugin((percentage, msg, current, active, modulepath) => {
-            if (process.stdout.isTTY && percentage < 1) {
-                process.stdout.cursorTo(0);
-                modulepath = modulepath ? ' …' + modulepath.substr(modulepath.length - 30) : '';
-                current = current ? ' ' + current : '';
-                active = active ? ' ' + active : '';
-                // process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${msg + current + active + modulepath} `);
-                process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${active + path.basename(modulepath)} `);
-                process.stdout.clearLine(1);
-            } else if (percentage === 1) {
-                process.stdout.cursorTo(0);
-                process.stdout.write(`> Building ${label}: 100%`);
-                process.stdout.clearLine(1);
-            }
-        }).apply(compiler);
+        // new webpack.ProgressPlugin((percentage, msg, current, active, modulepath) => {
+        //     if (process.stdout.isTTY && percentage < 1) {
+        //         process.stdout.cursorTo(0);
+        //         modulepath = modulepath ? ' …' + modulepath.substr(modulepath.length - 30) : '';
+        //         current = current ? ' ' + current : '';
+        //         active = active ? ' ' + active : '';
+        //         // process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${msg + current + active + modulepath} `);
+        //         process.stdout.write(`> Building ${label}: ${(percentage * 100).toFixed(0)}%  ${active + path.basename(modulepath)} `);
+        //         process.stdout.clearLine(1);
+        //     } else if (percentage === 1) {
+        //         process.stdout.cursorTo(0);
+        //         process.stdout.write(`> Building ${label}: 100%`);
+        //         process.stdout.clearLine(1);
+        //     }
+        // }).apply(compiler);
 
         compiler.run((err, stats) => {
             if (err) return reject(err);
-            process.stdout.write(` (completed in ${stats.endTime - stats.startTime}ms)`);
+            process.stdout.write(`> Building ${label} (completed in ${stats.endTime - stats.startTime}ms)`);
             process.stdout.write('\n');
 
             // process.stdout.write(stats.toString({
@@ -77,18 +77,18 @@ const build = async (webpackConfig, label) => {
     })
 }
 
-const buildClient = async config => {
+const buildClient = async (config, compiler) => {
     mkdirp.sync(config.clientOutputDir);
     // let pages = await getPageList(config.pageDir, []);
     let webpackConfig = webpackConfigClient.getConfigs(config);
-    await build(webpackConfig, 'Client');
+    await build(webpackConfig, 'Client', compiler);
 }
 
-const buildServer = async config => {
+const buildServer = async (config, compiler) => {
     mkdirp.sync(config.serverOutputDir);
     // let pages = await getPageList(config.pageDir, []);
     let webpackConfig = webpackConfigServer.getConfigs(config);
-    await build(webpackConfig, 'Server');
+    await build(webpackConfig, 'Server', compiler);
 }
 
 const all = async config => {

@@ -85,6 +85,7 @@ const getConfigs = config => {
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
+            new webpack.HotModuleReplacementPlugin()
             // new webpack.NamedChunksPlugin(function(chunk) {
             //     if (chunk.name) return chunk.name;
             //     for (var m of chunk._modules) {

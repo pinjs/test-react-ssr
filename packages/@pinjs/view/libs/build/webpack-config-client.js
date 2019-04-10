@@ -14,7 +14,7 @@ const getConfigs = config => {
         mode: isDevMode ? 'development' : 'production',
         name: 'client',
         target: 'web',
-        entry: [entryIndex],
+        entry: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', entryIndex],
         devtool: 'cheap-module-eval-source-map',
         output: {
             publicPath: config.publicPath,
@@ -81,6 +81,7 @@ const getConfigs = config => {
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
+            new webpack.HotModuleReplacementPlugin(),
             // new webpack.NamedChunksPlugin(function(chunk) {
             //     if (chunk.name) return chunk.name;
             //     for (var m of chunk._modules) {

@@ -1,10 +1,9 @@
 const path = require('path');
 const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpackHotClient = require('webpack-hot-client');
 const build = require('./libs/build');
 const utils = require('./libs/utils');
 const logger = require('./libs/logger');
+const dev = require('./dev');
 
 class PinView {
     constructor(config) {
@@ -14,6 +13,10 @@ class PinView {
             clientOutputDir: path.join(process.cwd(), 'build/client'),
             serverOutputDir: path.join(process.cwd(), 'build/server'),
         }, config || {});
+
+        this.webpackConfig = {};
+        this.webpackDevServerOptions = {};
+        this.webpackCompiler = null;
 
         this.SSRBundleManifest = null;
         this.SSRBuildpath = this.config.serverOutputDir;
@@ -30,105 +33,44 @@ class PinView {
         this.SSRBuild = new this.SSRBuildClass(this.config);
     }
 
-    async init(rebuild = true) {
+    async init(rebuild = true, webpackDevServerOptions = {}) {
+        this.webpackDevServerOptions = dev.config(this.config.publicPath, webpackDevServerOptions);
+        this.webpackConfig = await build.getWebpackConfigs(this.config);
+        this.webpackCompiler = webpack(this.webpackConfig);
+
         if (rebuild) {
-            await build.buildClient(this.config);
-            await build.buildServer(this.config);
+            await build.buildClient(this.config, this.webpackCompiler.compilers[0]);
+            await build.buildServer(this.config, this.webpackCompiler.compilers[1]);
+            logger.info('> Build completed')
         }
         await this.loadSSRBuild();
+        await this.initWebpack();
     }
 
-    getClient(compiler, options) {
-        return new Promise((resolve) => {
-            const client = webpackHotClient(compiler, options.hotClient);
-            const server = client.server;
-            server.on('listening', () => resolve(client));
-        });
-    }
-
-    getMiddleware(compiler, devMiddleware) {
-        return (context, next) => {
-            // wait for webpack-dev-middleware to signal that the build is ready
-            const ready = new Promise((resolve, reject) => {
-                for (const comp of [].concat(compiler.compilers || compiler)) {
-                    comp.hooks.failed.tap('pinjsView', (error) => reject(error));
-                }
-
-                devMiddleware.waitUntilValid(() => resolve(true));
-            });
-            // tell webpack-dev-middleware to handle the request
-            const init = new Promise((resolve) => {
-                devMiddleware(
-                    context.req, {
-                        end: (content) => {
-                            // eslint-disable-next-line no-param-reassign
-                            context.body = content;
-                            resolve();
-                        },
-                        getHeader: context.get.bind(context),
-                        setHeader: context.set.bind(context),
-                        locals: context.state
-                    },
-                    () => resolve(next())
-                );
-            });
-
-            return Promise.all([ready, init]);
-        };
-    }
-
-    async middleware(options = {}) {
-        options = Object.assign({
-            devMiddleware: {
-                hot: true,
-                writeToDisk: true,
-                serverSideRender: true,
-                publicPath: this.config.publicPath,
-                logLevel: 'silent',
-                watchOptions: {
-                    // ignored: /view\/pages\.jsx/
-                }
-            },
-            hotClient: {
-                port: 44297,
-                reload: true,
-                // logLevel: 'silent'
-            },
-        }, options || {});
-
-        const webpackConfig = await build.getWebpackConfigs(this.config);
-        const compiler = webpack(webpackConfig);
-        const clientCompiler = compiler.compilers[0];
-        const serverCompiler = compiler.compilers[1];
-        const devMiddleware = webpackDevMiddleware(compiler, options.devMiddleware);
-        const middleware = this.getMiddleware(compiler, devMiddleware);
-        const hotClient = await this.getClient(compiler, options);
-        const close = (callback) => {
-            const next = hotClient ? () => hotClient.close(callback) : callback;
-            devMiddleware.close(next);
-        };
-
+    async initWebpack() {
+        const serverCompiler = this.webpackCompiler.compilers[1];
         serverCompiler.hooks.watchRun.tapAsync('pinjsView', (_compiler, done) => {
             let watchFileSystem = _compiler.watchFileSystem;
             let watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
             let updatedFile = Object.keys(watcher.mtimes)[0];
 
-            if (!updatedFile.startsWith(path.join(process.cwd(), '.pinjs', 'view'))) {
+            if (updatedFile && !updatedFile.startsWith(path.join(process.cwd(), '.pinjs', 'view'))) {
                 logger.info('> File updated: ' + updatedFile);
             }
             return done();
         });
         serverCompiler.hooks.done.tapAsync('pinjsView', async (stats, done) => {
-            console.log('hooks.done.tapAsync');
+            // console.log('hooks.done.tapAsync');
             await this.loadSSRBuild();
             return done();
         });
+    }
 
-        return Object.assign(middleware, {
-            hotClient,
-            devMiddleware,
-            close
-        });
+    middleware() {
+        return [
+            dev.middleware(this.webpackCompiler, this.webpackDevServerOptions.middleware),
+            dev.hot(this.webpackCompiler.compilers[0])
+        ];
     }
 
     async render(req, res, pagePath, query) {
