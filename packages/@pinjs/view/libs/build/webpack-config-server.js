@@ -10,7 +10,7 @@ const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 
 const getConfigs = config => {
     let webpackConfig = {
-        watch: true,
+        watch: false,
         cache: false,
         mode: isDevMode ? 'development' : 'production',
         name: 'server',
@@ -85,7 +85,7 @@ const getConfigs = config => {
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
-            new webpack.HotModuleReplacementPlugin()
+            // new webpack.HotModuleReplacementPlugin()
             // new webpack.NamedChunksPlugin(function(chunk) {
             //     if (chunk.name) return chunk.name;
             //     for (var m of chunk._modules) {

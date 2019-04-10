@@ -9,12 +9,15 @@ const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 
 const getConfigs = config => {
     let webpackConfig = {
-        watch: true,
+        watch: false,
         cache: false,
         mode: isDevMode ? 'development' : 'production',
         name: 'client',
         target: 'web',
-        entry: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', entryIndex],
+        entry: [
+            // 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
+            entryIndex
+        ],
         devtool: 'cheap-module-eval-source-map',
         output: {
             publicPath: config.publicPath,
@@ -75,13 +78,13 @@ const getConfigs = config => {
                 IS_SERVER: JSON.stringify(false),
             }),
             new CleanWebpackPlugin({
-                dry: false,
+                dry: true,
                 verbose: false,
                 cleanStaleWebpackAssets: false,
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
-            new webpack.HotModuleReplacementPlugin(),
+            // new webpack.HotModuleReplacementPlugin(),
             // new webpack.NamedChunksPlugin(function(chunk) {
             //     if (chunk.name) return chunk.name;
             //     for (var m of chunk._modules) {

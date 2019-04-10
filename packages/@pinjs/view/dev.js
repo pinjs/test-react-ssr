@@ -19,7 +19,7 @@ const config = (publicPath, webpackDevServerOptions) => {
         hotClient: {
             port: 44297,
             reload: true,
-            // logLevel: 'silent'
+            logLevel: 'info'
         },
     }, webpackDevServerOptions || {})
 }
