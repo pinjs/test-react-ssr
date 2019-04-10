@@ -40,6 +40,7 @@ const getPageList = async (pageDir, pages = []) => {
 }
 
 const build = async (webpackConfig, label, compiler = null) => {
+    process.stdout.write(`> Building ${label}...`);
     return new Promise((resolve, reject) => {
         compiler = compiler || webpack(webpackConfig);
 
@@ -61,7 +62,7 @@ const build = async (webpackConfig, label, compiler = null) => {
 
         compiler.run((err, stats) => {
             if (err) return reject(err);
-            process.stdout.write(`> Building ${label} (completed in ${stats.endTime - stats.startTime}ms)`);
+            process.stdout.write(` completed in ${stats.endTime - stats.startTime}ms`);
             process.stdout.write('\n');
 
             // process.stdout.write(stats.toString({
@@ -79,14 +80,12 @@ const build = async (webpackConfig, label, compiler = null) => {
 
 const buildClient = async (config, compiler) => {
     mkdirp.sync(config.clientOutputDir);
-    // let pages = await getPageList(config.pageDir, []);
     let webpackConfig = webpackConfigClient.getConfigs(config);
     await build(webpackConfig, 'Client', compiler);
 }
 
 const buildServer = async (config, compiler) => {
     mkdirp.sync(config.serverOutputDir);
-    // let pages = await getPageList(config.pageDir, []);
     let webpackConfig = webpackConfigServer.getConfigs(config);
     await build(webpackConfig, 'Server', compiler);
 }
