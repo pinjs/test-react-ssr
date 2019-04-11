@@ -5,7 +5,6 @@ const ReactLoadableSSRAddon = require('react-loadable-ssr-addon');
 
 const isDevMode = process.env.NODE_ENV !== 'production';
 const entryIndex = path.join(path.dirname(path.dirname(__dirname)), 'src/client');
-const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 
 const getConfigs = config => {
     let webpackConfig = {
@@ -15,7 +14,6 @@ const getConfigs = config => {
         name: 'client',
         target: 'web',
         entry: [
-            // 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
             entryIndex
         ],
         devtool: 'cheap-module-eval-source-map',

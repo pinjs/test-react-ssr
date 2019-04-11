@@ -6,7 +6,6 @@ const ReactLoadableSSRAddon = require('react-loadable-ssr-addon');
 
 const isDevMode = process.env.NODE_ENV !== 'production';
 const entryIndex = path.join(path.dirname(path.dirname(__dirname)), 'src/server');
-const sourceRegex = new RegExp(`${path.dirname(entryIndex)}`);
 
 const getConfigs = config => {
     let webpackConfig = {
