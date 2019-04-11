@@ -1,7 +1,5 @@
 const path = require('path');
-const stringify = require('json-stringify-safe');
 const webpack = require('webpack');
-const hotClient = require('webpack-hot-client');
 const build = require('./libs/build');
 const utils = require('./libs/utils');
 const logger = require('./libs/logger');
@@ -41,7 +39,7 @@ class PinView {
         this.webpackCompiler = webpack(this.webpackConfig);
 
         if (rebuild) {
-            // await build.buildClient(this.config, this.webpackCompiler.compilers[0]);
+            await build.buildClient(this.config, this.webpackCompiler.compilers[0]);
             await build.buildServer(this.config, this.webpackCompiler.compilers[1]);
             logger.info('> Build completed')
         }
@@ -49,48 +47,10 @@ class PinView {
         await this.initWebpack();
     }
 
-    getHotClient(compiler, options) {
-        const client = hotClient(compiler, options);
-        const { server } = client;
-        
-        return new Promise(resolve => {
-            server.on('listening', () => {
-                const { address, port } = server._server.address();
-                server.host = address;
-                server.port = port;
-                
-                server.broadcast(stringify({
-                    type: 'window-reload',
-                    date: {
-                        test: 'ahihi'
-                    }
-                }));
-                // console.log(client);
-                // console.log(server.broadcast.toString());
-                // console.log(`WebSocket Server Listening on ${server.host}:${port}`);
-                resolve();
-            });
-
-            server.once('connection', (socket) => {
-                console.log('WebSocket Client Connected');
-            
-                for (const client of server.clients) {
-                    client.send(stringify({
-                        type: 'reload',
-                        date: {
-                            test: 'ahihi'
-                        }
-                    }));
-                }
-            });
-        });
-    }
-
     async initWebpack() {
         const clientCompiler = this.webpackCompiler.compilers[0];
         const serverCompiler = this.webpackCompiler.compilers[1];
-
-        await this.getHotClient(clientCompiler, this.webpackDevServerOptions.hotClient);
+        await dev.getHotClient(clientCompiler, this.webpackDevServerOptions.hotClient);
 
         serverCompiler.hooks.watchRun.tapAsync('pinjsView', (_compiler, done) => {
             let watchFileSystem = _compiler.watchFileSystem;
@@ -103,17 +63,13 @@ class PinView {
             return done();
         });
         serverCompiler.hooks.done.tapAsync('pinjsView', async (stats, done) => {
-            console.log('hooks.done.tapAsync');
             await this.loadSSRBuild();
             return done();
         });
     }
 
     middleware() {
-        return [
-            dev.middleware(this.webpackCompiler, this.webpackDevServerOptions.middleware),
-            // dev.hot(this.webpackCompiler.compilers[0])
-        ];
+        return dev.middleware(this.webpackCompiler, this.webpackDevServerOptions.middleware);
     }
 
     async render(req, res, pagePath, query) {

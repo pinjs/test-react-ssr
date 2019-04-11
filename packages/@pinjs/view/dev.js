@@ -1,8 +1,7 @@
-const webpackHotClient = require('webpack-hot-client');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const PassThrough = require('stream').PassThrough;
-
+const hotClient = require('./libs/hotClient');
 
 const config = (publicPath, webpackDevServerOptions) => {
     return Object.assign({
@@ -60,9 +59,8 @@ const middleware = (compiler, options) => {
     return devServerMiddleware;
 }
 
-const hot = compiler => {
+const hotMiddleware = compiler => {
     let middleware = webpackHotMiddleware(compiler, {
-        // log: console.log,
         path: '/__webpack_hmr',
         heartbeat: 10 * 1000,
         reload: true,
@@ -90,4 +88,5 @@ const hot = compiler => {
 
 exports.config = config;
 exports.middleware = middleware;
-exports.hot = hot;
+exports.hotMiddleware = hotMiddleware;
+exports.getHotClient = hotClient.getHotClient;
