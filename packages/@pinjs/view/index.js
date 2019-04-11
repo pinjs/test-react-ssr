@@ -36,11 +36,11 @@ class PinView {
         this.webpackOptions = utils.config(this.config.publicPath, webpackOptions);
         this.webpackConfig = await build.getWebpackConfigs(this.config);
         this.webpackCompiler = webpack(this.webpackConfig);
-        this.webpackDevMiddleware = await utils.getWebpackDevMiddleware(this.webpackCompiler, this.webpackOptions.devServer);
-
         const clientCompiler = this.webpackCompiler.compilers[0];
         const serverCompiler = this.webpackCompiler.compilers[1];
         await utils.getWebpackHotClient(clientCompiler, this.webpackOptions.hotClient);
+        this.webpackDevMiddleware = await utils.getWebpackDevMiddleware(this.webpackCompiler, this.webpackOptions.devServer);
+
         await this.loadSSRBuild();
         this.initWebpackSSRWatcher(serverCompiler);
     }
@@ -83,7 +83,7 @@ class PinView {
             return res.end('ok');
         }
 
-        await utils.beforeViewRender(req, res, this.webpackDevMiddleware);
+        await utils.beforeViewRender(req, res, this.webpackCompiler, this.webpackDevMiddleware);
 
         let rendered = await this.SSRBuild.render(pagePath, {}, this.SSRBundleManifest);
         let cssScripts = rendered.cssScripts || [];

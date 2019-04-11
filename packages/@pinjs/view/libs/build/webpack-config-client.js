@@ -82,6 +82,9 @@ const getConfigs = config => {
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
+            new webpack.WatchIgnorePlugin([
+                path.join(process.cwd(), '.pinjs', 'view', 'pages.jsx')
+            ]),
         ],
     }
 

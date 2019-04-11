@@ -68,29 +68,30 @@ const config = (publicPath, webpackOptions) => {
     };
 }
 
-const getWebpackDevMiddleware = async (compiler, options) => {
-    const devMiddleware = webpackDevMiddleware(compiler, options);
-
-    await new Promise((resolve, reject) => {
+const waitUntilValid = (compiler, devMiddleware) => {
+    return new Promise((resolve, reject) => {
         for (const comp of [].concat(compiler.compilers || compiler)) {
             comp.hooks.failed.tap('PinJsView', error => reject(error));
         }
 
-        devMiddleware.waitUntilValid(() => resolve(true));
+        devMiddleware.waitUntilValid(() => resolve(devMiddleware));
     });
-
-    return devMiddleware;
 }
 
-const beforeViewRender = (req, res, webpackDevMiddleware) => {
+const getWebpackDevMiddleware = async (compiler, options) => {
+    const devMiddleware = webpackDevMiddleware(compiler, options);
+
+    return await waitUntilValid(compiler, devMiddleware);
+}
+
+const beforeViewRender = async (req, res, compiler, webpackDevMiddleware) => {
     if (isProduction) return;
+
+    await waitUntilValid(compiler, webpackDevMiddleware);
 
     return new Promise((resolve) => {
         res = Object.assign(res, {
-            getHeader: key => {
-                console.log('get header: ' + key)
-                return res.headers[key] || null
-            },
+            getHeader: key => res.headers[key] || null,
             locals: {}
         });
 
