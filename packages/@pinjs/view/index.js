@@ -28,6 +28,23 @@ class PinView {
         }
     }
 
+    async init(webpackOptions = {}) {
+        if (isProduction) {
+            return await this.loadSSRBuild();
+        }
+
+        this.webpackOptions = utils.config(this.config.publicPath, webpackOptions);
+        this.webpackConfig = await build.getWebpackConfigs(this.config);
+        this.webpackCompiler = webpack(this.webpackConfig);
+        this.webpackDevMiddleware = await utils.getWebpackDevMiddleware(this.webpackCompiler, this.webpackOptions.devServer);
+
+        const clientCompiler = this.webpackCompiler.compilers[0];
+        const serverCompiler = this.webpackCompiler.compilers[1];
+        await utils.getWebpackHotClient(clientCompiler, this.webpackOptions.hotClient);
+        await this.loadSSRBuild();
+        this.initWebpackSSRWatcher(serverCompiler);
+    }
+
     async loadSSRBuild() {
         this.SSRBuildFile = this.SSRBuildpath + '/main.js';
         this.SSRBundleManifestFile = this.config.serverOutputDir + '/react-loadable-manifest.json';
@@ -44,24 +61,7 @@ class PinView {
         this.SSRBuild = new this.SSRBuildClass(this.config);
     }
 
-    async init(webpackOptions = {}) {
-        if (isProduction) {
-            return await this.loadSSRBuild();
-        }
-
-        this.webpackOptions = utils.config(this.config.publicPath, webpackOptions);
-        this.webpackConfig = await build.getWebpackConfigs(this.config);
-        this.webpackCompiler = webpack(this.webpackConfig);
-        this.webpackDevMiddleware = await utils.getWebpackDevMiddleware(this.webpackCompiler, this.webpackOptions.devServer);
-
-        const clientCompiler = this.webpackCompiler.compilers[0];
-        const serverCompiler = this.webpackCompiler.compilers[1];
-        await utils.getWebpackHotClient(clientCompiler, this.webpackOptions.hotClient);
-        await this.loadSSRBuild();
-        this.initWebpack(serverCompiler);
-    }
-
-    async initWebpack(serverCompiler) {
+    async initWebpackSSRWatcher(serverCompiler) {
         serverCompiler.hooks.watchRun.tapAsync('PinJsView', (_compiler, done) => {
             let watchFileSystem = _compiler.watchFileSystem;
             let watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
