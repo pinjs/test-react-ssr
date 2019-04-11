@@ -52,20 +52,20 @@ const searchCache = (moduleName, callback) => {
 };
 
 const config = (publicPath, webpackOptions) => {
-    return Object.assign({
-        devServer: {
+    return {
+        devServer: Object.assign({
             hot: true,
             writeToDisk: true,
             serverSideRender: true,
             publicPath: publicPath,
             logLevel: 'silent',
-        },
-        hotClient: {
+        }, webpackOptions.devServer || {}),
+        hotClient: Object.assign({
             port: 44297,
             reload: true,
             logLevel: 'info'
-        },
-    }, webpackOptions || {})
+        }, webpackOptions.hotClient || {}),
+    };
 }
 
 const getWebpackDevMiddleware = async (compiler, options) => {
