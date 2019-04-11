@@ -10,7 +10,6 @@ const router = new Router();
     try {
         const view = new PinView(config);
         await view.init();
-        router.use(view.middleware());
 
         router.get('*', async (ctx, next) => {
             ctx.status = 200;

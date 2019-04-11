@@ -40,12 +40,14 @@ class SSR {
         let preloadedState = store.getState();
         let bundles = getBundles(bundleManifest, modulesToBeLoaded);
         let jsScripts = [`<script>window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}</script>`];
+        let cssScripts = [];
         (bundles.js || []).map(bundle => jsScripts.push(`<script src="${bundle.publicPath}" async></script>`));
+        (bundles.css || []).map(bundle => cssScripts.push(`<link href="${bundle.publicPath}" rel="stylesheet" />`));
 
         return {
             html,
-            jsScripts: jsScripts,
-            cssFiles: (bundles.css || []).map(bundle => `${bundle.publicPath}?v=${bundle.hash}`),
+            jsScripts,
+            cssScripts,
         };
     }
 

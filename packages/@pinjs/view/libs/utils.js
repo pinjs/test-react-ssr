@@ -1,3 +1,8 @@
+const _ = require('lodash');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const hotClient = require('./hotClient');
+const isProduction = process.env.NODE_ENV === 'production';
+
 /**
  * Author: Ben Barkay
  * Url: https://stackoverflow.com/a/14801711/2422005
@@ -46,4 +51,86 @@ const searchCache = (moduleName, callback) => {
     }
 };
 
+const config = (publicPath, webpackOptions) => {
+    return Object.assign({
+        devServer: {
+            hot: true,
+            writeToDisk: true,
+            serverSideRender: true,
+            publicPath: publicPath,
+            logLevel: 'silent',
+        },
+        hotClient: {
+            port: 44297,
+            reload: true,
+            logLevel: 'info'
+        },
+    }, webpackOptions || {})
+}
+
+const getWebpackDevMiddleware = async (compiler, options) => {
+    const devMiddleware = webpackDevMiddleware(compiler, options);
+
+    await new Promise((resolve, reject) => {
+        for (const comp of [].concat(compiler.compilers || compiler)) {
+            comp.hooks.failed.tap('PinJsView', error => reject(error));
+        }
+
+        devMiddleware.waitUntilValid(() => resolve(true));
+    });
+
+    return devMiddleware;
+}
+
+const beforeViewRender = (req, res, webpackDevMiddleware) => {
+    if (isProduction) return;
+
+    return new Promise((resolve) => {
+        res = Object.assign(res, {
+            getHeader: key => {
+                console.log('get header: ' + key)
+                return res.headers[key] || null
+            },
+            locals: {}
+        });
+
+        webpackDevMiddleware(req, res, () => resolve());
+    });
+}
+
+const normalizeDevMiddlewareAssets = assets => {
+    if (_.isObject(assets)) {
+        return Object.values(assets);
+    }
+
+    return Array.isArray(assets) ? assets : [assets];
+}
+
+const getSSRDevMiddlewareAssets = (pagePath, webpackStats, fs) => {
+    pagePath = pagePath.substring(1);
+    const assetsByChunkName = webpackStats.stats[0].toJson().assetsByChunkName;
+    const outputPath = webpackStats.stats[0].toJson().outputPath;
+
+    const assets = normalizeDevMiddlewareAssets(assetsByChunkName[pagePath]);
+
+    const jsScripts = assets.filter(path => path.endsWith('.js')).map(js => {
+        return `<script src="${outputPath + js}">${fs.readFileSync(outputPath + '/' + js)}</script>`;
+    });
+    const cssScripts = [
+        `<style>
+            ${assets.filter(path => path.endsWith('.css')).map(css => fs.readFileSync(outputPath + '/' + js)).join('\n')}
+        </style>`
+    ];
+
+    return {
+        jsScripts,
+        cssScripts
+    };
+}
+
 exports.purgeCache = purgeCache;
+exports.config = config;
+exports.getWebpackDevMiddleware = getWebpackDevMiddleware;
+exports.getWebpackHotClient = hotClient.getHotClient;
+exports.beforeViewRender = beforeViewRender;
+exports.getSSRDevMiddlewareAssets = getSSRDevMiddlewareAssets;

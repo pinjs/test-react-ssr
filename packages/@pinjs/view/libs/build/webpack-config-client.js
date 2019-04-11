@@ -77,22 +77,13 @@ const getConfigs = config => {
                 PIN_VIEW_DIR: JSON.stringify(path.join(process.cwd(), '.pinjs', 'view')),
                 IS_SERVER: JSON.stringify(false),
             }),
-            // new CleanWebpackPlugin({
-            //     dry: true,
-            //     verbose: false,
-            //     cleanStaleWebpackAssets: false,
-            //     protectWebpackAssets: true,
-            //     dangerouslyAllowCleanPatternsOutsideProject: true,
-            // }),
-            // new webpack.HotModuleReplacementPlugin(),
-            // new webpack.NamedChunksPlugin(function(chunk) {
-            //     if (chunk.name) return chunk.name;
-            //     for (var m of chunk._modules) {
-            //         if (sourceRegex.test(m.context)) {
-            //             return path.basename(m.rawRequest);
-            //         }
-            //     }
-            // })
+            new CleanWebpackPlugin({
+                dry: false,
+                verbose: false,
+                cleanStaleWebpackAssets: false,
+                protectWebpackAssets: true,
+                dangerouslyAllowCleanPatternsOutsideProject: true,
+            }),
         ],
     }
 
