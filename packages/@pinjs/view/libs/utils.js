@@ -59,7 +59,7 @@ const config = (publicPath, webpackOptions) => {
             serverSideRender: true,
             publicPath: publicPath,
             logLevel: 'silent',
-        }, webpackOptions.devServer || {}),
+        }, webpackOptions.devServer || {}, { writeToDisk: true }),
         hotClient: Object.assign({
             port: 44297,
             reload: true,
