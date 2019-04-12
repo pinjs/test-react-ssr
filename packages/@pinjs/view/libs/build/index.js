@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const path = require('path');
 const fs = require('fs-extra');
 const mkdirp = require('mkdirp');
@@ -10,7 +11,7 @@ const pinViewDir = path.join(process.cwd(), '.pinjs/view');
 
 !fs.existsSync(pinViewDir) && mkdirp(pinViewDir);
 
-const createPagesList = (pageDir, pages = []) => {
+const createPagesList = (pageDir, customPages = []) => {
     if (pageDir[pageDir.length - 1] == '/') {
         pageDir = pageDir.substring(0, pageDir.length - 1);
     }
@@ -38,6 +39,38 @@ const createPagesList = (pageDir, pages = []) => {
             `'${pathName}': ${pageKeyName}`
         );
     });
+
+    /** Process custom pages */
+    customPages.forEach(page => {
+        let pageCleanName = null;
+        let pathName = null;
+        let pageKeyName = null;
+
+        if (_.isString(page)) {
+            pageCleanName = path.basename(page);
+            pathName = pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
+            pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
+        } else {
+            pageCleanName = page.cleanname || page.pathname;
+            pathName = page.pathname;
+            pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
+            page = page.component;
+        }
+
+        pageManifestContent.push({
+            pathname: pathName,
+            component: page
+        });
+
+        pageImport.push(`const ${pageKeyName} = Loadable({
+            loader: () => import(/* webpackChunkName: "${pathName}" */'${page}'),
+            loading: () => Loading
+        })`);
+        pageComponentContent.push(
+            `'${pathName}': ${pageKeyName}`
+        );
+    });
+
 
     fs.writeFileSync(pinViewPageManifestFile, JSON.stringify(pageManifestContent, null, 4));
     fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${pageImport.join('\n')};const pagesMap = {${pageComponentContent.join(',')}};export default pagesMap;`);
@@ -102,7 +135,7 @@ const all = async config => {
 }
 
 const getWebpackConfigs = config => {
-    createPagesList(config.pageDir, []);
+    createPagesList(config.pageDir, config.customPages || []);
     let webpackClientConfig = webpackConfigClient.getConfigs(config);
     let webpackServerConfig = webpackConfigServer.getConfigs(config);
 
