@@ -5,7 +5,11 @@ const customPages = [
     {
         pathname: 'TestPathPrefix/CustomPage2WithCustomName',
         component: path.join(__dirname, 'custom/pages/custompage2.jsx')
-    }
+    },
+    {
+        pathname: 'about',
+        component: path.join(__dirname, 'custom/pages/custompage3.jsx')
+    },
 ];
 
 

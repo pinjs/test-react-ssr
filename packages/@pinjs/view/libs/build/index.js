@@ -4,6 +4,7 @@ const fs = require('fs-extra');
 const mkdirp = require('mkdirp');
 const glob = require('fast-glob');
 const webpack = require('webpack');
+const logger = require('../logger');
 
 const webpackConfigClient = require('./webpack-config-client');
 const webpackConfigServer = require('./webpack-config-server');
@@ -22,17 +23,22 @@ const createPagesList = (pageDir, customPages = []) => {
     let pageManifestContent = [];
     let pageComponentContent = [];
     let pageImport = [];
+    let pathNamesList = [];
+
     pagesFound.forEach(page => {
         let pageCleanName = page.substring(pageDir.length + 1);
         let pathName = pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
         let pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
+        let pageComponent = page;
+
+        pathNamesList.push(pathName);
         pageManifestContent.push({
             pathname: pathName,
             component: page
         });
 
         pageImport.push(`const ${pageKeyName} = Loadable({
-            loader: () => import(/* webpackChunkName: "${pathName}" */'${page}'),
+            loader: () => import(/* webpackChunkName: "${pathName}" */'${pageComponent}'),
             loading: () => Loading
         })`);
         pageComponentContent.push(
@@ -45,25 +51,32 @@ const createPagesList = (pageDir, customPages = []) => {
         let pageCleanName = null;
         let pathName = null;
         let pageKeyName = null;
+        let pageComponent = null;
 
         if (_.isString(page)) {
             pageCleanName = path.basename(page);
             pathName = pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
             pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
+            pageComponent = page;
         } else {
             pageCleanName = page.cleanname || page.pathname;
             pathName = page.pathname;
             pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
-            page = page.component;
+            pageComponent = page.component;
         }
 
+        if (pathNamesList.includes(pathName)) {
+            return logger.error('> Duplicated path name: ' + pathName);
+        }
+
+        pathNamesList.push(pathName);
         pageManifestContent.push({
             pathname: pathName,
             component: page
         });
 
         pageImport.push(`const ${pageKeyName} = Loadable({
-            loader: () => import(/* webpackChunkName: "${pathName}" */'${page}'),
+            loader: () => import(/* webpackChunkName: "${pathName}" */'${pageComponent}'),
             loading: () => Loading
         })`);
         pageComponentContent.push(
