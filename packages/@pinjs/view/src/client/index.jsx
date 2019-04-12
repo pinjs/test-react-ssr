@@ -6,6 +6,7 @@ import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
 import ComponentLoader from '../shared/ComponentLoader';
 import Routing from './routing';
+import './clientPingFile.png';
 
 const preloadedState = window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
 delete window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle

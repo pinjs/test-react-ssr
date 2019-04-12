@@ -11,7 +11,7 @@ const router = new Router();
         const view = new PinView(config);
         await view.init();
 
-        router.get('*', async (ctx, next) => {
+        router.get('*', async ctx => {
             ctx.status = 200;
             await view.render(ctx.req, ctx.res, ctx.path, ctx.query);
         });

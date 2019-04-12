@@ -1,12 +1,42 @@
 "use strict";
 
-
 /**
  * Source: https://github.com/webpack-contrib/webpack-hot-client/blob/master/lib/client/index.js
  */
 
 /* eslint-disable global-require, consistent-return */
 (function hotClientEntry() {
+    var isPinging = false;
+    function ping (url, callback) {
+        if (isPinging) return callback(new Error('Ping is still running'));
+        isPinging = true;
+        var img = new Image();
+        img.onerror = function() {
+            isPinging = false;
+            callback(new Error('Ping server is down...'));
+        }
+
+        img.onload = function() {
+            isPinging = false;
+            log.info('Ping server is up...')
+            callback(null);
+        }
+
+        img.src = url;
+    }
+
+    function waitForServerAvailable (pingUrl, callback) {
+        var timer = setInterval(function() {
+            ping(pingUrl, function(err) {
+                if (!err) {
+                    clearInterval(timer);
+                }
+                callback(err);
+            })
+        }, 1500);
+    }
+
+
     // eslint-disable-next-line no-underscore-dangle
     if (window.__webpackHotClient__) {
         return;
@@ -83,6 +113,15 @@
         },
         'window-reload': function windowReload() {
             window.location.reload();
+        },
+        reloadIfAvailable: function reloadIfAvailable(data) {
+            var publicPath = data.publicPath || '/';
+            waitForServerAvailable(publicPath + 'ping.png', function (err) {
+                if (!err) {
+                    return window.location.reload();
+                }
+                log.error(err.message || err);
+            });
         },
         warnings: function warnings(_ref5) {
             var _warnings = _ref5.warnings;

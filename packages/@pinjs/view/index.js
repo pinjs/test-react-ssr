@@ -1,6 +1,7 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const webpack = require('webpack');
+const chokidar = require('chokidar');
 const build = require('./libs/build');
 const utils = require('./libs/utils');
 const logger = require('./libs/logger');
@@ -33,16 +34,16 @@ class PinView {
             return await this.loadSSRBuild();
         }
 
+        this.webpackConfig = build.getWebpackConfigs(this.config);
         this.webpackOptions = utils.config(this.config.publicPath, webpackOptions);
-        this.webpackConfig = await build.getWebpackConfigs(this.config);
         this.webpackCompiler = webpack(this.webpackConfig);
         const clientCompiler = this.webpackCompiler.compilers[0];
         const serverCompiler = this.webpackCompiler.compilers[1];
-        await utils.getWebpackHotClient(clientCompiler, this.webpackOptions.hotClient);
+        await utils.getWebpackHotClient(clientCompiler, this.webpackOptions.hotClient, this.config.publicPath);
         this.webpackDevMiddleware = await utils.getWebpackDevMiddleware(this.webpackCompiler, this.webpackOptions.devServer);
 
         await this.loadSSRBuild();
-        this.initWebpackSSRWatcher(serverCompiler);
+        this.initFileWatcher(serverCompiler, clientCompiler);
     }
 
     async loadSSRBuild() {
@@ -55,13 +56,14 @@ class PinView {
         }
 
         utils.purgeCache(this.SSRBuildFile);
+        utils.purgeCache(this.SSRBundleManifestFile);
         this.SSRBundleManifest = require(this.SSRBundleManifestFile);
         this.SSRBuildClass = require(this.SSRBuildFile);
         await this.SSRBuildClass.preload();
         this.SSRBuild = new this.SSRBuildClass(this.config);
     }
 
-    async initWebpackSSRWatcher(serverCompiler) {
+    async initFileWatcher(serverCompiler, clientCompiler) {
         serverCompiler.hooks.watchRun.tapAsync('PinJsView', (_compiler, done) => {
             let watchFileSystem = _compiler.watchFileSystem;
             let watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
@@ -75,6 +77,19 @@ class PinView {
         serverCompiler.hooks.done.tapAsync('PinJsView', async (stats, done) => {
             await this.loadSSRBuild();
             return done();
+        });
+
+        /** Watch for new file in pages directory */
+        const watcher = chokidar.watch(this.config.pagesDir, {
+            ignored: /(^|[\/\\])\../,
+            ignoreInitial: true,
+            persistent: true
+        });
+
+        watcher.on('all', async (event, path) => {
+            logger.info(`> ${event}: ${path}`);
+            build.createPagesList(this.config.pagesDir);
+            await this.loadSSRBuild();
         });
     }
 

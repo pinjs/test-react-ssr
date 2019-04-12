@@ -1,10 +1,10 @@
-const _ = require('lodash');
 const uuid = require('uuid/v4');
 const stringify = require('json-stringify-safe');
 const webpackHotClient = require('webpack-hot-client');
 const ParserHelpers = require('webpack/lib/ParserHelpers');
 const { HotModuleReplacementPlugin } = require('webpack');
 const getOptions = require('webpack-hot-client/lib/options');
+const logger = require('../logger');
 
 const addEntry = (entry, compilerName, options) => {
     const clientEntry = [`${__dirname}/client?${compilerName || uuid()}`];
@@ -93,7 +93,7 @@ function hotPlugin(compiler) {
     hmrPlugin.apply(compiler);
 }
 
-const getHotClient = (compiler, opts = {}) => {
+const getHotClient = (compiler, opts = {}, publicPath) => {
     opts.autoConfigure = false;
     const client = webpackHotClient(compiler, opts);
     const server = client.server;
@@ -108,10 +108,10 @@ const getHotClient = (compiler, opts = {}) => {
                 try {
                     let clientData = JSON.parse(data);
                     if (clientData.type == 'reconnected') {
-                        server.broadcast(stringify({ type: 'window-reload' }));
+                        server.broadcast(stringify({ type: 'reloadIfAvailable', data: { publicPath } }));
                     }
                 } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                 }
             });
         });

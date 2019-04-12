@@ -10,7 +10,11 @@ const pinViewDir = path.join(process.cwd(), '.pinjs/view');
 
 !fs.existsSync(pinViewDir) && mkdirp(pinViewDir);
 
-const getPageList = async (pageDir, pages = []) => {
+const createPagesList = (pageDir, pages = []) => {
+    if (pageDir[pageDir.length - 1] == '/') {
+        pageDir = pageDir.substring(0, pageDir.length - 1);
+    }
+
     let pagesFound = glob.sync([`${pageDir}/*\.(js|jsx)`, `${pageDir}/**/*\.(js|jsx)`]);
     let pinViewPageManifestFile = path.join(pinViewDir, 'page-manifest.json');
     let pinViewPageComponent = path.join(pinViewDir, 'pages.jsx');
@@ -97,8 +101,8 @@ const all = async config => {
     ]);
 }
 
-const getWebpackConfigs = async config => {
-    await getPageList(config.pageDir, []);
+const getWebpackConfigs = config => {
+    createPagesList(config.pageDir, []);
     let webpackClientConfig = webpackConfigClient.getConfigs(config);
     let webpackServerConfig = webpackConfigServer.getConfigs(config);
 
@@ -108,4 +112,5 @@ const getWebpackConfigs = async config => {
 exports.all = all;
 exports.buildClient = buildClient;
 exports.buildServer = buildServer;
+exports.createPagesList = createPagesList;
 exports.getWebpackConfigs = getWebpackConfigs;

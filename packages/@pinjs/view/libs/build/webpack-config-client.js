@@ -16,7 +16,7 @@ const getConfigs = config => {
         entry: [
             entryIndex
         ],
-        devtool: 'cheap-module-eval-source-map',
+        devtool: 'source-map',
         output: {
             publicPath: config.publicPath,
             path: config.clientOutputDir,
@@ -47,7 +47,16 @@ const getConfigs = config => {
                         ],
                     },
                 },
-            }, ],
+            }, {
+                test: /clientPingFile\.png$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: 'ping.png',
+                        outputPath: config.clientOutputDir,
+                    },
+                }]
+            }],
         },
         optimization: {
             nodeEnv: 'development',
@@ -67,9 +76,9 @@ const getConfigs = config => {
             },
         },
         plugins: [
-            new ReactLoadableSSRAddon({
-                filename: 'react-loadable-manifest.json',
-            }),
+            // new ReactLoadableSSRAddon({
+            //     filename: 'react-loadable-manifest.json',
+            // }),
             new webpack.DefinePlugin({
                 OUTPUT_DIR: JSON.stringify(config.clientOutputDir),
                 PIN_VIEW_DIR: JSON.stringify(path.join(process.cwd(), '.pinjs', 'view')),
@@ -82,9 +91,6 @@ const getConfigs = config => {
                 protectWebpackAssets: true,
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
-            new webpack.WatchIgnorePlugin([
-                path.join(process.cwd(), '.pinjs', 'view', 'pages.jsx')
-            ]),
         ],
     }
 
