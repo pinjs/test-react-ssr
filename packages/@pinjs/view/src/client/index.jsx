@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { Switch, Route } from 'react-router';
 import { Provider } from 'react-redux';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
 import ComponentLoader from '../shared/ComponentLoader';
-import Routing from './routing';
 import './clientPingFile.png';
 
 const preloadedState = window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
@@ -18,7 +18,9 @@ ComponentLoader.getPagesMap().then(() => {
         ReactDOM.hydrate(
             <Provider store={store}>
                 <BrowserRouter>
-                    <Routing />
+                    <Switch>
+                        <Route path={'*'} render={props => <ComponentLoader {...props} />}></Route>
+                    </Switch>
                 </BrowserRouter>
             </Provider>,
             appRoot

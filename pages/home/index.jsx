@@ -6,7 +6,7 @@ export default class HomePage extends React.Component {
         return (
             <div>
                 This is home page<br />
-                <Link to="/about">About</Link><br />
+                <Link to="/about" state={{ fromDashboard: true }}>About</Link><br />
                 <Link to="/contact">Contact</Link><br />
             </div>
         )

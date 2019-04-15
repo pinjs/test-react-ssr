@@ -1,5 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router';
+import NotFound from './NotFound';
 
 class ComponentLoader extends React.Component {
     constructor() {
@@ -8,6 +9,7 @@ class ComponentLoader extends React.Component {
             loading: true,
             pathname: '',
             Component: () => <div>Loading</div>,
+            componentProps: {}
         }
     }
 
@@ -16,24 +18,37 @@ class ComponentLoader extends React.Component {
         ComponentLoader.PagesMap = (await import(`${PIN_VIEW_DIR}/pages.jsx`)).default;
     }
 
-    componentWillMount() {
-        let pathname = this.props.location.pathname;
+    async loadComponent(pathname) {
+        console.log(this.props);
         pathname = pathname.substring(1);
+        let componentProps = {};
         let Component = ComponentLoader.PagesMap[pathname] || (() => <div>Not found</div>);
-        this.setState({ Component });
+        
+        if (typeof Component.getInitialProps == 'function') {
+            try {
+                componentProps = await Component.getInitialProps();
+            } catch (e) {
+                console.error(e);
+                Component = NotFound;
+            }
+        }
+        this.setState({ Component, componentProps });
     }
 
-    componentWillReceiveProps(props) {
+    async componentWillMount() {
+        let pathname = this.props.location.pathname;
+        await this.loadComponent(pathname);
+    }
+
+    async componentWillReceiveProps(props) {
         let pathname = props.location.pathname;
-        pathname = pathname.substring(1);
-        let Component = ComponentLoader.PagesMap[pathname] || (() => <div>Not found</div>);
-        this.setState({ Component });
+        await this.loadComponent(pathname);
     }
 
     render() {
         let { Component } = this.state;
         return (
-            <Component location={this.props.location} />
+            <Component location={this.props.location} {...this.state.componentProps} />
         )
     }
 }
