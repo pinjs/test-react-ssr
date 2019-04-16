@@ -11,6 +11,16 @@ const router = new Router();
         const view = new PinView(config);
         await view.init();
 
+        router.get('/aboutFake', async ctx => {
+            ctx.status = 200;
+            await view.render(ctx.req, ctx.res, '/about', ctx.query);
+        });
+
+        router.get('/fakecontaaack', async ctx => {
+            ctx.status = 200;
+            await view.render(ctx.req, ctx.res, '/contact', ctx.query);
+        });
+
         router.get('*', async ctx => {
             ctx.status = 200;
             await view.render(ctx.req, ctx.res, ctx.path, ctx.query);

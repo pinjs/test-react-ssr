@@ -13,7 +13,8 @@ delete window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
 const store = createReduxStore({ preloadedState });
 
 ComponentLoader.getPagesMap().then(() => {
-    Loadable.preloadReady().then(() => {
+    Loadable.preloadReady().then(a => {
+        console.log(a);
         const appRoot = document.getElementById('app');
         ReactDOM.hydrate(
             <Provider store={store}>

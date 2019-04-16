@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import CT1 from './ct1';
 
 export default class ContactPage extends React.Component {
+    static async getInitialProps() {
+        return new Promise(resolve => {
+            setTimeout(() => resolve(), 500)
+        });
+    }
+
     componentDidMount() {
         console.log('ContactPage')
     }
