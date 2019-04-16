@@ -5,8 +5,6 @@
   "repository": "https://github.com/pinjs/test-react-ssr",
   "main": "index.js",
   "scripts": {
-    "install": "echo 'installing...............' && npm run build",
-    "build": "webpack --config prebuild.webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
@@ -19,12 +17,15 @@
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.3",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-async-to-generator": "^7.4.0",
+    "@babel/plugin-transform-regenerator": "^7.4.3",
     "@babel/plugin-transform-runtime": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.4.3",
     "arg": "^4.1.0",
     "babel-loader": "^8.0.5",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "chalk": "^2.4.2",
     "chokidar-cli": "^1.2.2",
     "clean-webpack-plugin": "^2.0.1",
@@ -54,6 +55,6 @@
   "author": "",
   "license": "ISC",
   "_moduleAliases": {
-    "link" : "src/components/link"
+    "link": "src/components/link"
   }
 }

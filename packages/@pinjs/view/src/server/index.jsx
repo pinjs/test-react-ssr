@@ -17,7 +17,7 @@ class SSR {
     static PageMaps = {}
 
     async render(pathname, data, bundleManifest, context = {}) {
-        await ComponentLoader.getPagesMap();
+        // await ComponentLoader.getPagesMap();
         let store = createReduxStore({ server: true });
         let modules = new Set();
 
@@ -32,7 +32,7 @@ class SSR {
                                     <Page.Component {...Object.assign({}, { _route: props }, Page.props)} />
                                 )
                             }}></Route> */}
-                            <Route path={'*'} render={props => <ComponentLoader {...props} />}></Route>
+                            <Route path={'*'} render={props => <ComponentLoader {...props} location={pathname} />}></Route>
                         </Switch>
                     </StaticRouter>
                 </Loadable.Capture>
@@ -65,7 +65,8 @@ class SSR {
     static async preload() {
         // SSR.PageMaps = (await import(`${PIN_VIEW_DIR}/pages.jsx`)).default;
         await ComponentLoader.getPagesMap();
-        return await Loadable.preloadAll();
+        await Loadable.preloadAll();
+        return;
     }
 }
 
