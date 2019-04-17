@@ -44,6 +44,7 @@ class SSR {
             `<script>window.__INIT_STATE__ = ${JSON.stringify(initState).replace(/</g, '\\u003c')}</script>`,
             `<script>window.__INIT_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}</script>`,
         ];
+
         (bundles.js || []).map(js => jsScripts.push(`<script src="${js.publicPath}" async></script>`));
         (bundles.css || []).map(css => cssScripts.push(`<link href="${css.publicPath}" rel="stylesheet"/>`));
 

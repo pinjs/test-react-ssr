@@ -12,7 +12,6 @@ export default class HomePage extends React.Component {
     }
 
     render() {
-        console.log('Render')
         return (
             <div>
                 This is home page: {this.props.name} at {this.props.time}<br />

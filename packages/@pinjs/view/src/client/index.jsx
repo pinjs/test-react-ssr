@@ -61,7 +61,5 @@ PageLoader.getPagesMap().then(pagesMap => {
 
 if (module.hot) {
     module.hot.accept();
-    module.hot.dispose(function() {
-        console.log('dispose');
-    });
+    module.hot.dispose(() => console.log('dispose'));
 }
