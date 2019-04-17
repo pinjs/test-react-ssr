@@ -8,8 +8,8 @@ import createReduxStore from '../shared/createReduxStore';
 import PageLoader from '../shared/PageLoader';
 import './clientPingFile.png';
 
-const initState = window.__INIT_STATE__;
-const initProps = window.__INIT_PROPS__;
+let initState = window.__INIT_STATE__ || {};
+let initProps = window.__INIT_PROPS__ || {};
 delete window.__INIT_STATE__;
 delete window.__INIT_PROPS__;
 const store = createReduxStore({ initState });
@@ -25,14 +25,19 @@ PageLoader.getPagesMap().then(pagesMap => {
                             <Route
                                 path={'*'}
                                 render={props => {
-                                    let pageProps = initProps;
+                                    let pageProps = {};
                                     let pathname = props.location.pathname;
+                                    let state = props.history.location.state;
 
-                                    // If click from link on browser
-                                    let currentLocation = props.history.location;
-                                    if (currentLocation && currentLocation.state) {
-                                        currentLocation.state.__page_pathname && (pathname = currentLocation.state.__page_pathname);
-                                        currentLocation.state.__page_props && (pageProps = currentLocation.state.__page_props);
+                                    // Pass initProps to page props in case of SSR
+                                    if (initProps) {
+                                        pageProps = initProps;
+                                        initProps = null;
+                                    }
+                                    // Only assign history state to page props in case of CSR
+                                    else {
+                                        state.__page_pathname && (pathname = state.__page_pathname);
+                                        state.__page_props && (pageProps = state.__page_props);
                                     }
 
                                     if (pathname[0] == '/') {
