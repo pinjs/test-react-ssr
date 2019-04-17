@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from '@pinjs/view/link';
 
 export default class ContactPage extends React.Component {
     componentDidMount() {

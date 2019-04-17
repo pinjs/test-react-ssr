@@ -38,7 +38,8 @@ const createPagesList = (pageDir, customPages = []) => {
         }
         pageImport[pathName] = `const ${pageKeyName} = Loadable({
             loader: () => import(/* webpackChunkName: "${pathName}" */'${pageComponent}'),
-            loading: () => Loading
+            loading: () => Loading,
+            modules: ['${pageComponent}'],
         })`;
         pageComponentContent[pathName] = `'${pathName}': ${pageKeyName}`
     });

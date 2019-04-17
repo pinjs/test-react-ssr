@@ -5,33 +5,58 @@ import { Switch, Route } from 'react-router';
 import { Provider } from 'react-redux';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
-import ComponentLoader from '../shared/ComponentLoader';
+import PageLoader from '../shared/PageLoader';
 import './clientPingFile.png';
 
-const preloadedState = window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
-delete window.__PRELOADED_STATE__; // eslint-disable-line no-underscore-dangle
-const store = createReduxStore({ preloadedState });
+const initState = window.__INIT_STATE__;
+const initProps = window.__INIT_PROPS__;
+delete window.__INIT_STATE__;
+delete window.__INIT_PROPS__;
+const store = createReduxStore({ initState });
 
-ComponentLoader.getPagesMap().then(() => {
-    Loadable.preloadReady().then(a => {
-        console.log(a);
-        const appRoot = document.getElementById('app');
-        ReactDOM.hydrate(
-            <Provider store={store}>
-                <BrowserRouter>
-                    <Switch>
-                        <Route path={'*'} render={props => <ComponentLoader {...props} />}></Route>
-                    </Switch>
-                </BrowserRouter>
-            </Provider>,
-            appRoot
-        );
+PageLoader.getPagesMap().then(pagesMap => {
+    Loadable.preloadReady().then(() => {
+        Loadable.preloadAll().then(() => {
+            const appRoot = document.getElementById('app');
+            ReactDOM.hydrate(
+                <Provider store={store}>
+                    <BrowserRouter>
+                        <Switch>
+                            <Route
+                                path={'*'}
+                                render={props => {
+                                    let pageProps = initProps;
+                                    let pathname = props.location.pathname;
+
+                                    // If click from link on browser
+                                    let currentLocation = props.history.location;
+                                    if (currentLocation && currentLocation.state) {
+                                        currentLocation.state.__page_pathname && (pathname = currentLocation.state.__page_pathname);
+                                        currentLocation.state.__page_props && (pageProps = currentLocation.state.__page_props);
+                                    }
+
+                                    if (pathname[0] == '/') {
+                                        pathname = pathname.substring(1);
+                                    }
+
+                                    let LoadablePage = pagesMap[pathname];
+                                    return (
+                                        <PageLoader pathname={pathname} pageComponent={LoadablePage} pageProps={pageProps} />
+                                    );
+                                }}
+                            />
+                        </Switch>
+                    </BrowserRouter>
+                </Provider>,
+                appRoot
+            );
+        });
     });
 });
 
 if (module.hot) {
     module.hot.accept();
     module.hot.dispose(function() {
-        console.log('dispose')
+        console.log('dispose');
     });
 }

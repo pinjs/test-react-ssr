@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
-import ComponentLoader from '../shared/ComponentLoader';
+import PageLoader from '../shared/PageLoader';
 
 class SSR {
     constructor(config) {
@@ -14,66 +14,52 @@ class SSR {
         this.PageComponent = null;
     }
 
-    static PageMaps = {}
+    static PageMaps = {};
 
     async render(pathname, data, bundleManifest, context = {}) {
-        // await ComponentLoader.getPagesMap();
         let store = createReduxStore({ server: true });
         let modules = new Set();
 
-        // let Page = await ComponentLoader.getPageComponent(pathname);
+        let Page = await PageLoader.getPageComponent(pathname);
         let html = ReactDOMServer.renderToString(
             <Provider store={store}>
-                <Loadable.Capture report={moduleName => modules.add(moduleName)}>
+                <Loadable.Capture
+                    report={moduleName => modules.add(moduleName)}>
                     <StaticRouter location={pathname} context={context}>
                         <Switch>
-                            {/* <Route path={'*'} render={props => {
-                                return (
-                                    <Page.Component {...Object.assign({}, { _route: props }, Page.props)} />
-                                )
-                            }}></Route> */}
-                            <Route path={'*'} render={props => <ComponentLoader {...props} location={pathname} />}></Route>
+                            <Route path={'*'} render={props => {
+                                return <Page.Component {...Object.assign({}, { _route: props }, Page.props)} />
+                            }}/>
                         </Switch>
                     </StaticRouter>
                 </Loadable.Capture>
             </Provider>
         );
 
-        let modulesToBeLoaded = [
-            ...bundleManifest.entrypoints,
-            ...Array.from(modules)
-        ];
-
-        let preloadedState = store.getState();
-        preloadedState.common = { pathname };
-        let bundles = getBundles(bundleManifest, modulesToBeLoaded);
-        let jsScripts = [`<script>window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(
-            /</g,
-            '\\u003c'
-        )}</script>`];
+        let loadedModules = [...bundleManifest.entrypoints, ...Array.from(modules)];
+        let initState = store.getState();
+        let bundles = getBundles(bundleManifest, loadedModules);
         let cssScripts = [];
-        (bundles.js || []).map(bundle => jsScripts.push(`<script src="${bundle.publicPath}" async></script>`));
-        (bundles.css || []).map(bundle => cssScripts.push(`<link href="${bundle.publicPath}" rel="stylesheet" />`));
+        let jsScripts = [
+            `<script>window.__INIT_STATE__ = ${JSON.stringify(initState).replace(/</g, '\\u003c')}</script>`,
+            `<script>window.__INIT_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}</script>`,
+        ];
+        (bundles.js || []).map(js => jsScripts.push(`<script src="${js.publicPath}" async></script>`));
+        (bundles.css || []).map(css => cssScripts.push(`<link href="${css.publicPath}" rel="stylesheet"/>`));
 
         return {
             html,
             jsScripts,
-            cssScripts,
+            cssScripts
         };
     }
 
     static async preload() {
-        // SSR.PageMaps = (await import(`${PIN_VIEW_DIR}/pages.jsx`)).default;
-        await ComponentLoader.getPagesMap();
+        await PageLoader.getPagesMap();
         await Loadable.preloadAll();
-        return;
     }
 }
 
-if (module.hot) {
-    module.hot.accept(function() {
-        console.log('Error handler')
-    });
-}
+module.hot && module.hot.accept(() => console.log('Error handler'));
 
 export default SSR;
