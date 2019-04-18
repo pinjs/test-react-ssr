@@ -1,5 +1,6 @@
 import { createBrowserHistory } from 'history';
 import { EventEmitter } from 'events';
+import BrowserRouter from './browser';
 
 const history = IS_SERVER ? null : createBrowserHistory();
 
@@ -24,4 +25,5 @@ class Router extends EventEmitter {
     }
 }
 
+export { default as BrowserRouter} from './browser';
 export default new Router();

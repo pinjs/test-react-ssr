@@ -14,11 +14,12 @@ class SSR {
 
     static PageMaps = {};
 
-    async render(pathname, data, bundleManifest, context = {}) {
+    async render(pathname, bundleManifest, devAssets) {
+        let Page = await PageLoader.getPageComponent(pathname);
+
         let store = createReduxStore({ server: true });
         let modules = new Set();
 
-        let Page = await PageLoader.getPageComponent(pathname);
         let html = ReactDOMServer.renderToString(
             <Provider store={store}>
                 <Loadable.Capture report={moduleName => modules.add(moduleName)}>
@@ -40,11 +41,12 @@ class SSR {
         (bundles.js || []).map(js => jsScripts.push(`<script src="${js.publicPath}" async></script>`));
         (bundles.css || []).map(css => cssScripts.push(`<link href="${css.publicPath}" rel="stylesheet"/>`));
 
-        return {
-            html,
-            jsScripts,
-            cssScripts
-        };
+        if (devAssets) {
+            cssScripts = devAssets.cssScripts || [];
+            jsScripts = devAssets.jsScripts || [];
+        }
+
+        return `<!doctype html><html lang="en"><head>${cssScripts.join('\n')}</head><body><div id="app">${html}</div>${jsScripts.join('\n')}</body></html>`;
     }
 
     static async preload() {

@@ -99,18 +99,15 @@ class PinView {
         }
 
         await utils.beforeViewRender(req, res, this.webpackCompiler, this.webpackDevMiddleware);
-
-        let rendered = await this.SSRBuild.render(pagePath, {}, this.SSRBundleManifest);
-        let cssScripts = rendered.cssScripts || [];
-        let jsScripts = rendered.jsScripts || [];
+        let devAssets = null;
 
         if (!isProduction && !this.webpackOptions.devServer.writeToDisk) {
-            let devAssets = utils.getSSRDevMiddlewareAssets(pagePath, res.locals.webpackStats, res.locals.fs);
-            cssScripts = devAssets.cssScripts || [];
-            jsScripts = devAssets.jsScripts || [];
+            devAssets = utils.getSSRDevMiddlewareAssets(pagePath, res.locals.webpackStats, res.locals.fs);
         }
 
-        res.end(`<!doctype html><html lang="en"><head>${cssScripts.join('\n')}</head><body><div id="app">${rendered.html}</div>${jsScripts.join('\n')}</body></html>`);
+        let renderedHtml = await this.SSRBuild.render(pagePath, this.SSRBundleManifest, devAssets);
+
+        res.end(renderedHtml);
     }
 }
 

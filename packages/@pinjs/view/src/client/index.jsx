@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import Loadable from 'react-loadable';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from '../components/router';
 import createReduxStore from '../shared/createReduxStore';
 import PageLoader from '../shared/PageLoader';
-import ClientApp from './app';
 import './clientPingFile.png';
 
 let initPath = window.__PINJS_PATH__ || '/';
@@ -15,10 +15,10 @@ delete window.__PINJS_PROPS__;
 const store = createReduxStore({ initState });
 
 PageLoader.getPagesMap().then(pagesMap => {
-    Loadable.preloadAll().then(() => {
+    Loadable.preloadReady().then(() => {
         const appRoot = document.getElementById('app');
         ReactDOM.hydrate(<Provider store={store}>
-            <ClientApp render={props => {
+            <BrowserRouter render={props => {
                 let pathname = '/';
                 let pageProps = {};
                 let pageComponent = null;

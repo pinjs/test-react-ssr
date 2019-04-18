@@ -1,8 +1,8 @@
 import React from 'react';
-import Router from '../components/router';
-import PageLoader from '../shared/PageLoader';
+import Router from './';
+import PageLoader from '../../shared/PageLoader';
 
-export default class ClientApp extends React.Component {
+export default class BrowserRouter extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -28,7 +28,7 @@ export default class ClientApp extends React.Component {
     }
 
     render() {
-        let Children = this.props.render;
-        return <Children page={this.state.pageProps} />
+        let PageRenderer = this.props.render;
+        return <PageRenderer page={this.state.pageProps} />
     }
 }
