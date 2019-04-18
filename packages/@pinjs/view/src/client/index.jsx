@@ -14,7 +14,8 @@ delete window.__PINJS_STATE__;
 delete window.__PINJS_PROPS__;
 const store = createReduxStore({ initState });
 
-PageLoader.getPagesMap().then(pagesMap => {
+PageLoader.getPagesMap().then(async pagesMap => {
+    initPath && await pagesMap[initPath].preload();
     Loadable.preloadReady().then(() => {
         const appRoot = document.getElementById('app');
         ReactDOM.hydrate(<Provider store={store}>
