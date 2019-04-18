@@ -1,8 +1,8 @@
 import React from 'react';
-import { withRouter } from 'react-router';
 import querystring from 'querystring';
 import PropTypes from 'prop-types';
 import PageLoader from '../../shared/PageLoader';
+import Router from '../../components/router';
 
 class PinJsViewLink extends React.Component {
     constructor(props) {
@@ -49,10 +49,17 @@ class PinJsViewLink extends React.Component {
 
     async onClick(e) {
         e.preventDefault();
-        let Page = await PageLoader.getPageComponent(this.linkObject.pathname);
-        this.props.history.push(this.linkObject.to, Object.assign({}, this.linkObject.params, {
-            __page_props: Page.props
-        }));
+        Router.emit('routeChangeStarted', this.linkObject);
+        try {
+            let Page = await PageLoader.getPageComponent(this.linkObject.pathname);
+            Router.history.push(this.linkProps.href, Object.assign({}, this.linkObject.params, {
+                __page_props: Page.props
+            }));
+            Router.emit('routeChangeCompleted');
+        } catch (e) {
+            console.error(e);
+            Router.emit('routeChangeError', e);
+        }
     }
 
     render() {
@@ -81,4 +88,4 @@ PinJsViewLink.propsTypes = {
     }),
 }
 
-export default withRouter(PinJsViewLink);
+export default PinJsViewLink;

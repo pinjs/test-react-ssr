@@ -3,11 +3,11 @@ const path = require('path');
 const customPages = [
     path.join(__dirname, 'custom/pages/custompage1.jsx'),
     {
-        pathname: 'TestPathPrefix/CustomPage2WithCustomName',
+        pathname: '/TestPathPrefix/CustomPage2WithCustomName',
         component: path.join(__dirname, 'custom/pages/custompage2.jsx')
     },
     {
-        pathname: 'about',
+        pathname: '/about',
         component: path.join(__dirname, 'custom/pages/custompage3.jsx')
     },
 ];

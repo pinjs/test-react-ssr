@@ -23,15 +23,8 @@ class SSR {
         let Page = await PageLoader.getPageComponent(pathname);
         let html = ReactDOMServer.renderToString(
             <Provider store={store}>
-                <Loadable.Capture
-                    report={moduleName => modules.add(moduleName)}>
-                    <StaticRouter location={pathname} context={context}>
-                        <Switch>
-                            <Route path={'*'} render={props => {
-                                return <Page.Component {...Object.assign({}, { _route: props }, Page.props)} />
-                            }}/>
-                        </Switch>
-                    </StaticRouter>
+                <Loadable.Capture report={moduleName => modules.add(moduleName)}>
+                    <PageLoader pathname={pathname} Component={Page.Component} props={Page.props} />
                 </Loadable.Capture>
             </Provider>
         );
@@ -41,8 +34,9 @@ class SSR {
         let bundles = getBundles(bundleManifest, loadedModules);
         let cssScripts = [];
         let jsScripts = [
-            `<script>window.__INIT_STATE__ = ${JSON.stringify(initState).replace(/</g, '\\u003c')}</script>`,
-            `<script>window.__INIT_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}</script>`,
+            `<script>window.__PINJS_PATH__ = '${pathname}'</script>`,
+            `<script>window.__PINJS_STATE__ = ${JSON.stringify(initState).replace(/</g, '\\u003c')}</script>`,
+            `<script>window.__PINJS_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}</script>`,
         ];
 
         (bundles.js || []).map(js => jsScripts.push(`<script src="${js.publicPath}" async></script>`));

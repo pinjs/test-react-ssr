@@ -6,13 +6,13 @@ const common = require('./webpack-config-common');
 const entryIndex = path.join(path.dirname(path.dirname(__dirname)), 'src/server');
 
 const getConfigs = config => {
-    let webpackConfig = Object.assign({}, common.getCommonWebpackConfig(config, entryIndex), {
+    let webpackConfig = Object.assign({}, common.getCommonWebpackConfig(config, entryIndex, true), {
         name: 'server',
         target: 'node',
         entry: [entryIndex],
         output: {
             publicPath: config.publicPath,
-            path: config.serverOutputDir,
+            path: path.resolve(config.serverOutputDir),
             filename: '[name].js',
             chunkFilename: common.isDevMode ? '[name].js' : '[name].[chunkhash].js',
             libraryExport: 'default',

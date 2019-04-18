@@ -1,5 +1,4 @@
 import React from 'react';
-import { withRouter } from 'react-router';
 import NotFound from './NotFound';
 
 class PageLoader extends React.Component {
@@ -10,8 +9,8 @@ class PageLoader extends React.Component {
     }
 
     static async getPageComponent(pathname) {
-        if (pathname[0] == '/') {
-            pathname = pathname.substring(1);
+        if (pathname[0] != '/') {
+            pathname = '/' + pathname;
         }
 
         let props = {};
@@ -34,11 +33,11 @@ class PageLoader extends React.Component {
     }
 
     render() {
-        let PageComponent = this.props.pageComponent || NotFound;
-        let pageProps = this.props.pageProps || {};
+        let PageComponent = this.props.Component || NotFound;
+        let pageProps = this.props.props || {};
 
         return <PageComponent {...pageProps} />;
     }
 }
 
-export default withRouter(PageLoader);
+export default PageLoader;

@@ -7,7 +7,7 @@ const componentsDir = path.join(path.dirname(path.dirname(__dirname)), 'src/comp
 const PIN_VIEW_DIR = path.join(process.cwd(), '.pinjs', 'view');
 
 exports.isDevMode = process.env.NODE_ENV !== 'production';
-exports.getCommonWebpackConfig = (config, entryIndex) => {
+exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
     let customPageComponents = (config.customPages || []).map(pageComponent => {
         if (typeof pageComponent == 'string') {
             return pageComponent;
@@ -26,7 +26,8 @@ exports.getCommonWebpackConfig = (config, entryIndex) => {
         resolve: {
             extensions: ['.js', '.jsx'],
             alias: {
-                '@pinjs/view/link': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/components/link'))
+                '@pinjs/view/link': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/components/link')),
+                '@pinjs/view/router': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/components/router')),
             }
         },
         module: {
@@ -82,7 +83,7 @@ exports.getCommonWebpackConfig = (config, entryIndex) => {
             new webpack.DefinePlugin({
                 OUTPUT_DIR: JSON.stringify(config.serverOutputDir),
                 PIN_VIEW_DIR: JSON.stringify(PIN_VIEW_DIR),
-                IS_SERVER: JSON.stringify(true),
+                IS_SERVER: JSON.stringify(isServer),
             }),
             new CleanWebpackPlugin({
                 dry: false,

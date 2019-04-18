@@ -26,10 +26,17 @@ const createPagesList = (pageDir, customPages = []) => {
     let pathNamesList = [];
 
     pagesFound.forEach(page => {
-        let pageCleanName = page.substring(pageDir.length + 1);
+        let pageCleanName = page.substring(pageDir.length);
         let pathName = pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
         let pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
         let pageComponent = page;
+        let chunkName = pathName;
+        (chunkName[0] == '/') && (chunkName = chunkName.substring(1));
+
+        (pathName == '/index') && (pathName = '/');
+        if (pathName.endsWith('/index')) {
+            pathName = pathName.substring(0, pathName.length - 6);
+        }
 
         pathNamesList.push(pathName);
         pageManifestContent[pathName] = {
@@ -37,7 +44,7 @@ const createPagesList = (pageDir, customPages = []) => {
             component: page
         }
         pageImport[pathName] = `const ${pageKeyName} = Loadable({
-            loader: () => import(/* webpackChunkName: "${pathName}" */'${pageComponent}'),
+            loader: () => import(/* webpackChunkName: "${chunkName}" */'${pageComponent}'),
             loading: () => Loading,
             modules: ['${pageComponent}'],
         })`;
@@ -53,7 +60,7 @@ const createPagesList = (pageDir, customPages = []) => {
 
         if (_.isString(page)) {
             pageCleanName = path.basename(page);
-            pathName = pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
+            pathName = '/' + pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
             pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
             pageComponent = page;
         } else {
@@ -67,14 +74,18 @@ const createPagesList = (pageDir, customPages = []) => {
             logger.info('> Overriding page: ' + pathName);
         }
 
+        let chunkName = pathName;
+        (chunkName[0] == '/') && (chunkName = chunkName.substring(1));
+        (pathName == '/index') && (pathName = '/');
         pathNamesList.push(pathName);
         pageManifestContent[pathName] = {
             pathname: pathName,
             component: page
         }
         pageImport[pathName] = `const ${pageKeyName} = Loadable({
-            loader: () => import(/* webpackChunkName: "${pathName}" */'${pageComponent}'),
-            loading: () => Loading
+            loader: () => import(/* webpackChunkName: "${chunkName}" */'${pageComponent}'),
+            loading: () => Loading,
+            modules: ['${pageComponent}'],
         })`;
         pageComponentContent[pathName] = `'${pathName}': ${pageKeyName}`;
     });

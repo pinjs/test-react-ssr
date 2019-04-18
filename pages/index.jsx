@@ -7,7 +7,7 @@ export default class HomePage extends React.Component {
             setTimeout(() => resolve({
                 name: 'Phuong',
                 time: new Date().toISOString(),
-            }), 500)
+            }), 5000)
         });
     }
 
