@@ -46,6 +46,12 @@ class SSR {
             jsScripts = devAssets.jsScripts || [];
         }
 
+        if (PageLoader.SSRPage) {
+            return ReactDOMServer.renderToString(
+                <PageLoader.SSRPage styles={cssScripts.join('\n')} scripts={jsScripts.join('\n')} main={html} />
+            );
+        }
+
         return `<!doctype html><html lang="en"><head>${cssScripts.join('\n')}</head><body><div id="app">${html}</div>${jsScripts.join('\n')}</body></html>`;
     }
 

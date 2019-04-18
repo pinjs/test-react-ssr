@@ -3,8 +3,13 @@ import NotFound from './NotFound';
 
 class PageLoader extends React.Component {
     static PagesMap = {};
+    static SSRPage = null;
+    static DocumentPage = null;
     static async getPagesMap() {
-        PageLoader.PagesMap = (await import(`${PIN_VIEW_DIR}/pages.jsx`)).default;
+        let pagesMapContent = await import(`${PIN_VIEW_DIR}/pages.jsx`);
+        PageLoader.PagesMap = pagesMapContent.default;
+        PageLoader.SSRPage = pagesMapContent._ssr || null;
+        PageLoader.DocumentPage = pagesMapContent._doc || null;
         return PageLoader.PagesMap;
     }
 

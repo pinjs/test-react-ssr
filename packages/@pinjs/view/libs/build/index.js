@@ -90,9 +90,15 @@ const createPagesList = (pageDir, customPages = []) => {
         pageComponentContent[pathName] = `'${pathName}': ${pageKeyName}`;
     });
 
+    let exportSSrPage = '';
+    if (pageComponentContent['/_ssr']) {
+        exportSSrPage = `const _ssr = ____ssr; export { _ssr }`;
+        delete pageComponentContent['/_ssr'];
+    }
+
 
     fs.writeFileSync(pinViewPageManifestFile, JSON.stringify(Object.values(pageManifestContent), null, 4));
-    fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${Object.values(pageImport).join('\n')};const pagesMap = {${Object.values(pageComponentContent).join(',')}};export default pagesMap;`);
+    fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${Object.values(pageImport).join('\n')};const pagesMap = {${Object.values(pageComponentContent).join(',')}};export default pagesMap;\n${exportSSrPage}`);
 }
 
 const build = async (webpackConfig, label, compiler = null) => {
