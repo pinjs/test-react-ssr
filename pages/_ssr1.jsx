@@ -1,16 +1,17 @@
 import React from 'react';
+import DocumentMain from '@pinjs/view/document/main';
 
 export default class PinSSRPage extends React.Component {
     render() {
-        let main = this.props.main || '';
-        let scripts = this.props.scripts || '';
         let styles = this.props.styles || '';
         return (
             <html>
                 <head>
                     {styles}
                 </head>
-                <body dangerouslySetInnerHTML={{__html: main + scripts}}>
+                <body>
+                    <DocumentMain />
+                    {this.props.scripts || ''}
                 </body>
             </html>
         )

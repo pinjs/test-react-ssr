@@ -17,7 +17,7 @@ const store = createReduxStore({ initState });
 PageLoader.getPagesMap().then(async pagesMap => {
     initPath && await pagesMap[initPath].preload();
     Loadable.preloadReady().then(() => {
-        const appRoot = document.getElementById('app');
+        const appRoot = document.getElementById('__PINJS__');
         ReactDOM.hydrate(<Provider store={store}>
             <BrowserRouter render={props => {
                 let pathname = '/';

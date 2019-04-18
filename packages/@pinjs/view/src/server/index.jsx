@@ -5,6 +5,8 @@ import ReactDOMServer from 'react-dom/server';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
 import PageLoader from '../shared/PageLoader';
+import DocumentMain from '../shared/document/main';
+import DocumentScript from '../shared/document/script';
 
 class SSR {
     constructor(config) {
@@ -19,14 +21,11 @@ class SSR {
 
         let store = createReduxStore({ server: true });
         let modules = new Set();
-
-        let html = ReactDOMServer.renderToString(
-            <Provider store={store}>
-                <Loadable.Capture report={moduleName => modules.add(moduleName)}>
-                    <PageLoader pathname={pathname} Component={Page.Component} props={Page.props} />
-                </Loadable.Capture>
-            </Provider>
-        );
+        let html = ReactDOMServer.renderToString(<Provider store={store}>
+            <Loadable.Capture report={moduleName => modules.add(moduleName)}>
+                <PageLoader pathname={pathname} Component={Page.Component} props={Page.props} />
+            </Loadable.Capture>
+        </Provider>);
 
         let loadedModules = [...bundleManifest.entrypoints, ...Array.from(modules)];
         let initState = store.getState();
@@ -47,12 +46,14 @@ class SSR {
         }
 
         if (PageLoader.SSRPage) {
-            return ReactDOMServer.renderToString(
-                <PageLoader.SSRPage styles={cssScripts.join('\n')} scripts={jsScripts.join('\n')} main={html} />
+            DocumentScript.content = jsScripts.join('\n');
+            DocumentMain.content = html;
+            return ReactDOMServer.renderToStaticMarkup(
+                <PageLoader.SSRPage />
             );
         }
 
-        return `<!doctype html><html lang="en"><head>${cssScripts.join('\n')}</head><body><div id="app">${html}</div>${jsScripts.join('\n')}</body></html>`;
+        return `<!doctype html><html lang="en"><head>${cssScripts.join('\n')}</head><body><div id="__PINJS__">${html}</div>${jsScripts.join('\n')}</body></html>`;;
     }
 
     static async preload() {

@@ -21,14 +21,15 @@ const getConfigs = config => {
         externals: [nodeExternals({
             whitelist: [
                 '@pinjs/view/link',
+                '@pinjs/view/router',
+                '@pinjs/view/document/main',
             ]
         })],
     });
 
     webpackConfig.plugins.unshift(new ReactLoadableSSRAddon({
-        filename: 'react-loadable-manifest.json',
+        filename: path.join(config.serverOutputDir, 'react-loadable-manifest.json'),
     }));
-
     return webpackConfig;
 }
 
