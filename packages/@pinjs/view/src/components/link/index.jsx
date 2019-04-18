@@ -50,16 +50,7 @@ class PinJsViewLink extends React.Component {
     async onClick(e) {
         e.preventDefault();
         Router.emit('routeChangeStarted', this.linkObject);
-        try {
-            let Page = await PageLoader.getPageComponent(this.linkObject.pathname);
-            Router.history.push(this.linkProps.href, Object.assign({}, this.linkObject.params, {
-                __page_props: Page.props
-            }));
-            Router.emit('routeChangeCompleted');
-        } catch (e) {
-            console.error(e);
-            Router.emit('routeChangeError', e);
-        }
+        Router.history.push(this.linkProps.href, Object.assign({}, this.linkObject.params));
     }
 
     render() {

@@ -51,8 +51,7 @@ exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
                             '@babel/preset-react',
                         ],
                         plugins: [
-                            // require('@babel/plugin-transform-runtime'),
-                            ["@babel/transform-runtime"],
+                            require('@babel/plugin-transform-runtime'),
                             require('@babel/plugin-proposal-class-properties'),
                             require('@babel/plugin-proposal-object-rest-spread'),
                             require('@babel/plugin-syntax-dynamic-import'),

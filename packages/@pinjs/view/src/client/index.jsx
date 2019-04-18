@@ -1,11 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Switch, Router, Route } from 'react-router';
 import { Provider } from 'react-redux';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
 import PageLoader from '../shared/PageLoader';
-import PinJsRouter from '../components/router';
+import ClientApp from './app';
 import './clientPingFile.png';
 
 let initPath = window.__PINJS_PATH__ || '/';
@@ -19,31 +18,27 @@ PageLoader.getPagesMap().then(pagesMap => {
     Loadable.preloadAll().then(() => {
         const appRoot = document.getElementById('app');
         ReactDOM.hydrate(<Provider store={store}>
-            <Router history={PinJsRouter.history}>
-                <Switch>
-                    <Route path={'*'} render={props => {
-                        let pageProps = {};
-                        let pathname = props.location.pathname;
-                        let state = props.history.location.state;
+            <ClientApp render={props => {
+                let pathname = '/';
+                let pageProps = {};
+                let pageComponent = null;
 
-                        // Pass initProps to page props in case of SSR
-                        if (initProps) {
-                            pathname = initPath;
-                            pageProps = initProps;
-                            initProps = null;
-                        }
-                        // Only assign history state to page props in case of CSR
-                        else {
-                            state.__page_pathname && (pathname = state.__page_pathname);
-                            state.__page_props && (pageProps = state.__page_props);
-                        }
+                // Pass initProps to page props in case of SSR
+                if (initProps) {
+                    pathname = initPath;
+                    pageProps = initProps;
+                    pageComponent = PageLoader.PagesMap[pathname];
+                    initProps = null;
+                }
+                // Only assign history state to page props in case of CSR
+                else {
+                    pathname = props.page.pathname;
+                    pageProps = props.page.props;
+                    pageComponent = props.page.Component;
+                }
 
-                        (pathname[0] != '/') && (pathname = '/' + pathname);
-
-                        return <PageLoader pathname={pathname} Component={pagesMap[pathname]} props={pageProps} />;
-                    }}/>
-                </Switch>
-            </Router>
+                return <PageLoader pathname={pathname} Component={pageComponent} props={pageProps} />;
+            }} />
         </Provider>, appRoot);
     });
 });
