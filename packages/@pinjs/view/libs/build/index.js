@@ -90,15 +90,25 @@ const createPagesList = (pageDir, customPages = []) => {
         pageComponentContent[pathName] = `'${pathName}': ${pageKeyName}`;
     });
 
-    let exportSSrPage = '';
-    if (pageComponentContent['/_ssr']) {
-        exportSSrPage = `const _ssr = ____ssr; export { _ssr }`;
-        delete pageComponentContent['/_ssr'];
+    let exportDocumentPage = '';
+    if (pageComponentContent['/_doc']) {
+        exportDocumentPage = `const _doc = ____doc; export { _doc }`;
+        delete pageComponentContent['/_doc'];
+    }
+    let exportAppPage = '';
+    if (pageComponentContent['/_app']) {
+        exportAppPage = `const _app = ____app; export { _app }`;
+        delete pageComponentContent['/_app'];
+    }
+    let exportErrorPage = '';
+    if (pageComponentContent['/_error']) {
+        exportErrorPage = `const _error = ____error; export { _error }`;
+        delete pageComponentContent['/_error'];
     }
 
 
     fs.writeFileSync(pinViewPageManifestFile, JSON.stringify(Object.values(pageManifestContent), null, 4));
-    fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${Object.values(pageImport).join('\n')};const pagesMap = {${Object.values(pageComponentContent).join(',')}};export default pagesMap;\n${exportSSrPage}`);
+    fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${Object.values(pageImport).join('\n')};const pagesMap = {${Object.values(pageComponentContent).join(',')}};export default pagesMap;\n${exportDocumentPage}\n${exportAppPage}\n${exportErrorPage}`);
 }
 
 const build = async (webpackConfig, label, compiler = null) => {

@@ -1,11 +1,11 @@
 import React from 'react';
-import { Html, Main, Script, Head } from '@pinjs/view/document';
+import { Html, Main, Script, Head as DocumentHead } from '@pinjs/view/document';
 
-export default class PinSSRPage extends React.Component {
+export default class DocumentPage extends React.Component {
     render() {
         return (
             <Html>
-                <Head />
+                <DocumentHead />
                 <body>
                     <Main />
                     <Script />

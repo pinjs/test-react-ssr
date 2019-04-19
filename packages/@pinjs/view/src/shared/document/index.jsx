@@ -1,6 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
+import Html from './html';
+import Head from './head';
+import Main from './main';
+import Script from './script';
 
-export default class Document extends Component {
+export default class Document extends React.Component {
     render() {
         return (
             <Html>
@@ -14,66 +18,10 @@ export default class Document extends Component {
     }
 }
 
-export class Html extends Component {
-    static contextType = null;
-
-    render() {
-        const { children, ...props } = this.props;
-        return <html {...props}>{children}</html>;
-    }
+export {
+    Html,
+    Head,
+    Main,
+    Script,
 }
 
-export class Main extends Component {
-    static contextType = null;
-
-    render() {
-        const { main } = this.context.document;
-        return (
-            <div id='__PINJS__' dangerouslySetInnerHTML={{ __html: main }} />
-        );
-    }
-}
-
-export class Head extends Component {
-    static contextType = null;
-
-    getCssLinks() {
-        const { styles } = this.context.document;
-        return (styles || []).map(file =>  <link key={file} rel='stylesheet' href={file} />);
-    }
-
-    render() {
-        let { head } = this.context.document;
-        let children = this.props.children;
-
-        return (
-            <head {...this.props}>
-                {children}
-                {head}
-                {this.getCssLinks()}
-            </head>
-        );
-    }
-}
-
-export class Script extends Component {
-    static contextType = null;
-    getScripts() {
-        const { scripts } = this.context.document;
-        return (scripts || []).map(file => <script key={file} src={file} async />);
-    }
-
-    getInlineScripts() {
-        const { pinScripts } = this.context.document;
-        return pinScripts.map((script, i) => <script key={i}  dangerouslySetInnerHTML={{ __html: script }} />);
-    }
-
-    render() {
-        return (
-            <>
-                {this.getInlineScripts()}
-                {this.getScripts()}
-            </>
-        );
-    }
-}

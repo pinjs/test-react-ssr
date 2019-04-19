@@ -72,7 +72,7 @@ class SSR {
 
         return ReactDOMServer.renderToStaticMarkup(
             <SiteContext.Provider value={SiteContextValue}>
-                {PageLoader.SSRPage ? <PageLoader.SSRPage /> : <Document />}
+                {PageLoader.DocumentPage ? <PageLoader.DocumentPage /> : <Document />}
             </SiteContext.Provider>
         );
     }

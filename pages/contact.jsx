@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from '@pinjs/view/link';
+import Head from '@pinjs/view/head';
 import CT1 from './ct1';
 
 export default class ContactPage extends React.Component {
@@ -9,13 +10,13 @@ export default class ContactPage extends React.Component {
         });
     }
 
-    componentDidMount() {
-        console.log('ContactPage')
-    }
     render() {
         return (
             <div>
-                This is Contact page kk<br />
+                <Head>
+                    <title>This is contact page</title>
+                </Head>
+                This is Contact page<br />
                 <CT1 />
                 <Link to="/about">About</Link><br />
                 <Link to="/">Home</Link><br />

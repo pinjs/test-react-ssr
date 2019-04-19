@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from '@pinjs/view/link';
+import Head from '@pinjs/view/head';
 
 export default class HomePage extends React.Component {
     static async getInitialProps() {
@@ -14,6 +15,9 @@ export default class HomePage extends React.Component {
     render() {
         return (
             <div>
+                <Head>
+                    <title>This is home page</title>
+                </Head>
                 This is home page: {this.props.name} at {this.props.time}<br />
                 <Link className="about-page" to="/aboutFake" pathname="/about" params={{ fromDashboard: true }}>About</Link><br />
                 <Link to="/contact" href={{pathname: '/contact', to: '/fakecontaaack'}}>Contact</Link><br />

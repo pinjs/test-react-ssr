@@ -1,16 +1,26 @@
 import React from 'react';
-import NotFound from './NotFound';
+import ErrorPageComponent from './document/error';
+
+ErrorPageComponent.preload = () => {};
 
 class PageLoader extends React.Component {
     static PagesMap = {};
-    static SSRPage = null;
     static DocumentPage = null;
+    static AppPage = null;
+    static ErrorPage = null;
+
     static async getPagesMap() {
         let pagesMapContent = await import(`${PIN_VIEW_DIR}/pages.jsx`);
         PageLoader.PagesMap = pagesMapContent.default;
-        PageLoader.SSRPage = pagesMapContent._ssr || null;
         PageLoader.DocumentPage = pagesMapContent._doc || null;
+        PageLoader.AppPage = pagesMapContent._app || null;
+        PageLoader.ErrorPage = pagesMapContent._error || ErrorPageComponent;
+
         return PageLoader.PagesMap;
+    }
+
+    static async getPage(pathname) {
+        return PageLoader.PagesMap[pathname] || PageLoader.ErrorPage;
     }
 
     static async getPageComponent(pathname) {
@@ -19,7 +29,7 @@ class PageLoader extends React.Component {
         }
 
         let props = {};
-        let Component = NotFound;
+        let Component = PageLoader.ErrorPage;
         let LoadableComponent = PageLoader.PagesMap[pathname];
 
         if (!LoadableComponent) {
@@ -38,10 +48,12 @@ class PageLoader extends React.Component {
     }
 
     render() {
-        let PageComponent = this.props.Component || NotFound;
+        let PageComponent = this.props.Component || PageLoader.ErrorPage;
         let pageProps = this.props.props || {};
 
-        return <PageComponent {...pageProps} />;
+        return PageLoader.AppPage ?
+            <PageLoader.AppPage Component={PageComponent} pageProps={pageProps} /> :
+            <PageComponent {...pageProps} />
     }
 }
 

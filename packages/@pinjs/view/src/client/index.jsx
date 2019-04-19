@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from '../components/router';
 import createReduxStore from '../shared/createReduxStore';
 import PageLoader from '../shared/PageLoader';
+import ErrorBoundary from './ErrorBoundary';
 import './clientPingFile.png';
 
 let initPath = window.__PINJS_PATH__ || '/';
@@ -38,7 +39,7 @@ PageLoader.getPagesMap().then(async pagesMap => {
                     pageComponent = props.page.Component;
                 }
 
-                return <PageLoader pathname={pathname} Component={pageComponent} props={pageProps} />;
+                return <ErrorBoundary><PageLoader pathname={pathname} Component={pageComponent} props={pageProps} /></ErrorBoundary>
             }} />
         </Provider>, appRoot);
     });
