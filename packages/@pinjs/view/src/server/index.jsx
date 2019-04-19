@@ -5,55 +5,76 @@ import ReactDOMServer from 'react-dom/server';
 import Loadable from 'react-loadable';
 import createReduxStore from '../shared/createReduxStore';
 import PageLoader from '../shared/PageLoader';
-import DocumentMain from '../shared/document/main';
-import DocumentScript from '../shared/document/script';
+import { Html, Main, Script, Head } from '../shared/document';
 
 class SSR {
     constructor(config) {
         this.config = config;
         this.PageComponent = null;
+        this.ReactAppContextName = this.config.reactAppContextName;
+        this[this.ReactAppContextName] = React.createContext({
+            document: {
+                pinScripts: [],
+                scripts: [],
+                styles: [],
+                main: '',
+            }
+        });
+
+        Html.contextType = this[this.ReactAppContextName];
+        Main.contextType = this[this.ReactAppContextName];
+        Head.contextType = this[this.ReactAppContextName];
+        Script.contextType = this[this.ReactAppContextName];
     }
 
     static PageMaps = {};
 
     async render(pathname, bundleManifest, devAssets) {
         let Page = await PageLoader.getPageComponent(pathname);
-
         let store = createReduxStore({ server: true });
         let modules = new Set();
-        let html = ReactDOMServer.renderToString(<Provider store={store}>
-            <Loadable.Capture report={moduleName => modules.add(moduleName)}>
-                <PageLoader pathname={pathname} Component={Page.Component} props={Page.props} />
-            </Loadable.Capture>
-        </Provider>);
+        let mainHtml = ReactDOMServer.renderToString(
+            <Provider store={store}>
+                <Loadable.Capture report={moduleName => modules.add(moduleName)}>
+                    <PageLoader pathname={pathname} Component={Page.Component} props={Page.props} />
+                </Loadable.Capture>
+            </Provider>
+        );
 
         let loadedModules = [...bundleManifest.entrypoints, ...Array.from(modules)];
         let initState = store.getState();
         let bundles = getBundles(bundleManifest, loadedModules);
-        let cssScripts = [];
-        let jsScripts = [
-            `<script>window.__PINJS_PATH__ = '${pathname}'</script>`,
-            `<script>window.__PINJS_STATE__ = ${JSON.stringify(initState).replace(/</g, '\\u003c')}</script>`,
-            `<script>window.__PINJS_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}</script>`,
+        let scripts = [];
+        let styles = [];
+        let pinScripts = [
+            `window.__PINJS_PATH__ = '${pathname}'`,
+            `window.__PINJS_STATE__ = ${JSON.stringify(initState).replace(/</g, '\\u003c')}`,
+            `window.__PINJS_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}`,
         ];
 
-        (bundles.js || []).map(js => jsScripts.push(`<script src="${js.publicPath}" async></script>`));
-        (bundles.css || []).map(css => cssScripts.push(`<link href="${css.publicPath}" rel="stylesheet"/>`));
+        (bundles.js || []).map(js => scripts.push(js.publicPath));
+        (bundles.css || []).map(css => styles.push(css.publicPath));
 
         if (devAssets) {
-            cssScripts = devAssets.cssScripts || [];
-            jsScripts = devAssets.jsScripts || [];
+            styles = devAssets.styles || [];
+            scripts = devAssets.scripts || [];
         }
 
-        if (PageLoader.SSRPage) {
-            DocumentScript.content = jsScripts.join('\n');
-            DocumentMain.content = html;
-            return ReactDOMServer.renderToStaticMarkup(
-                <PageLoader.SSRPage />
-            );
-        }
+        const SiteContext = this[this.ReactAppContextName];
+        const SiteContextValue = {
+            document: {
+                pinScripts: pinScripts,
+                scripts: scripts,
+                styles: styles,
+                main: mainHtml,
+            }
+        };
 
-        return `<!doctype html><html lang="en"><head>${cssScripts.join('\n')}</head><body><div id="__PINJS__">${html}</div>${jsScripts.join('\n')}</body></html>`;;
+        return ReactDOMServer.renderToStaticMarkup(
+            <SiteContext.Provider value={SiteContextValue}>
+                {PageLoader.SSRPage ? <PageLoader.SSRPage /> : <Document />}
+            </SiteContext.Provider>
+        );
     }
 
     static async preload() {

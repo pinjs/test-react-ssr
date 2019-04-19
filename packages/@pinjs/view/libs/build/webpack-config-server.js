@@ -22,7 +22,7 @@ const getConfigs = config => {
             whitelist: [
                 '@pinjs/view/link',
                 '@pinjs/view/router',
-                '@pinjs/view/document/main',
+                '@pinjs/view/document',
             ]
         })],
     });

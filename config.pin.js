@@ -19,6 +19,7 @@ const config = {
     publicPath: '/assets/',
     clientOutputDir: path.join(__dirname, 'public', 'assets'),
     serverOutputDir: path.join(__dirname, '.pinjs/view/build'),
+    reactAppContextName: 'SiteContext'
 };
 
 module.exports = config;

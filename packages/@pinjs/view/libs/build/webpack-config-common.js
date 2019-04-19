@@ -28,7 +28,7 @@ exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
             alias: {
                 '@pinjs/view/link': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/components/link')),
                 '@pinjs/view/router': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/components/router')),
-                '@pinjs/view/document/main': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/shared/document/main')),
+                '@pinjs/view/document': path.resolve(path.join(process.cwd(), 'node_modules/@pinjs/view/src/shared/document')),
             }
         },
         module: {
