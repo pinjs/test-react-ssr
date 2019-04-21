@@ -30,6 +30,7 @@ const killProcess = proc => {
 
 const watchDev = proc => {
     let watchIgnored = [
+        '.pinjs',
         'package-lock.json',
         'node_modules',
         'package.json',

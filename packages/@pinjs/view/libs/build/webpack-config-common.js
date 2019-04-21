@@ -63,7 +63,7 @@ exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
             }],
         },
         optimization: {
-            nodeEnv: 'development',
+            nodeEnv: exports.isDevMode ? 'development' : 'production',
             splitChunks: {
                 cacheGroups: {
                     commons: {
@@ -83,6 +83,7 @@ exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
             new webpack.DefinePlugin({
                 OUTPUT_DIR: JSON.stringify(config.serverOutputDir),
                 PIN_VIEW_DIR: JSON.stringify(PIN_VIEW_DIR),
+                PIN_VIEW_NAMESPACE: JSON.stringify(config.namespace),
                 IS_SERVER: JSON.stringify(isServer),
             }),
             new CleanWebpackPlugin({

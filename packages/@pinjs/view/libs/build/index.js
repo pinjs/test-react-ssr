@@ -12,21 +12,21 @@ const pinViewDir = path.join(process.cwd(), '.pinjs/view');
 
 !fs.existsSync(pinViewDir) && mkdirp(pinViewDir);
 
-const createPagesList = (pageDir, customPages = []) => {
-    if (pageDir[pageDir.length - 1] == '/') {
-        pageDir = pageDir.substring(0, pageDir.length - 1);
+const createPagesList = (namespace, pagesDir, customPages = []) => {
+    if (pagesDir[pagesDir.length - 1] == '/') {
+        pagesDir = pagesDir.substring(0, pagesDir.length - 1);
     }
 
-    let pagesFound = glob.sync([`${pageDir}/*\.(js|jsx)`, `${pageDir}/**/*\.(js|jsx)`]);
-    let pinViewPageManifestFile = path.join(pinViewDir, 'page-manifest.json');
-    let pinViewPageComponent = path.join(pinViewDir, 'pages.jsx');
+    let pagesFound = glob.sync([`${pagesDir}/*\.(js|jsx)`, `${pagesDir}/**/*\.(js|jsx)`]);
+    let pinViewPageManifestFile = path.join(pinViewDir, namespace + '-page-manifest.json');
+    let pinViewPageComponent = path.join(pinViewDir, namespace + '-pages.jsx');
     let pageManifestContent = {};
     let pageComponentContent = {};
     let pageImport = {};
     let pathNamesList = [];
 
     pagesFound.forEach(page => {
-        let pageCleanName = page.substring(pageDir.length);
+        let pageCleanName = page.substring(pagesDir.length);
         let pathName = pageCleanName.substring(0, pageCleanName.length - path.extname(pageCleanName).length);
         let pageKeyName = pathName.replace(/[^a-zA-Z0-9_]/g, '___');
         let pageComponent = page;
@@ -111,7 +111,7 @@ const createPagesList = (pageDir, customPages = []) => {
     fs.writeFileSync(pinViewPageComponent, `import Loadable from 'react-loadable'; import React from 'react'; const Loading = <div>Loading...</div>;${Object.values(pageImport).join('\n')};const pagesMap = {${Object.values(pageComponentContent).join(',')}};export default pagesMap;\n${exportDocumentPage}\n${exportAppPage}\n${exportErrorPage}`);
 }
 
-const build = async (webpackConfig, label, compiler = null) => {
+const build = async (webpackConfig, label, compiler = null, output = false) => {
     process.stdout.write(`> Building ${label}...`);
     return new Promise((resolve, reject) => {
         compiler = compiler || webpack(webpackConfig);
@@ -137,7 +137,7 @@ const build = async (webpackConfig, label, compiler = null) => {
             process.stdout.write(` completed in ${stats.endTime - stats.startTime}ms`);
             process.stdout.write('\n');
 
-            process.stdout.write(stats.toString({
+            output && process.stdout.write(stats.toString({
                 colors: true,
                 modules: false,
                 children: false,
@@ -150,19 +150,40 @@ const build = async (webpackConfig, label, compiler = null) => {
     })
 }
 
+const transformConfig = config => {
+    if (config._view) {
+        config = config._view;
+    }
+
+    if (!Array.isArray(config)) {
+        config = [config];
+    }
+
+    return config;
+}
+
 const buildClient = async (config, compiler) => {
-    mkdirp.sync(config.clientOutputDir);
-    let webpackConfig = webpackConfigClient.getConfigs(config);
-    await build(webpackConfig, 'Client', compiler);
+    config = transformConfig(config);
+    for(var i = 0; i < config.length; i++) {
+        let _config = config[i];
+        mkdirp.sync(_config.clientOutputDir);
+        let webpackConfig = webpackConfigClient.getConfigs(_config);
+        await build(webpackConfig, 'Client ' + _config.namespace, compiler, true);
+    }
 }
 
 const buildServer = async (config, compiler) => {
-    mkdirp.sync(config.serverOutputDir);
-    let webpackConfig = webpackConfigServer.getConfigs(config);
-    await build(webpackConfig, 'Server', compiler);
+    config = transformConfig(config);
+    for(var i = 0; i < config.length; i++) {
+        let _config = config[i];
+        mkdirp.sync(_config.serverOutputDir);
+        let webpackConfig = webpackConfigServer.getConfigs(_config);
+        await build(webpackConfig, 'Server ' + _config.namespace, compiler, true);
+    }
 }
 
 const all = async config => {
+    config = transformConfig(config);
     return Promise.all([
         buildClient(config),
         buildServer(config),
@@ -170,7 +191,7 @@ const all = async config => {
 }
 
 const getWebpackConfigs = config => {
-    createPagesList(config.pageDir, config.customPages || []);
+    createPagesList(config.namespace, config.pagesDir, config.customPages || []);
     let webpackClientConfig = webpackConfigClient.getConfigs(config);
     let webpackServerConfig = webpackConfigServer.getConfigs(config);
 

@@ -8,7 +8,11 @@ const logger = require('./libs/logger');
 const isProduction = process.env.NODE_ENV === 'production';
 
 class PinView {
-    constructor(config) {
+    constructor(config = {}) {
+        if (config._view) {
+            config = config._view;
+        }
+
         this.config = Object.assign({
             pagesDir: path.join(process.cwd(), 'pages/'),
             publicPath: '/build/',

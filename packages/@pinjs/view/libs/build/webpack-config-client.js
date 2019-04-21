@@ -11,7 +11,8 @@ const getConfigs = config => {
             publicPath: config.publicPath,
             path: path.resolve(config.clientOutputDir),
             filename: '[name].js',
-            chunkFilename: common.isDevMode ? '[name].js' : '[name].[chunkhash].js',
+            // chunkFilename: common.isDevMode ? '[name].js' : '[name].[chunkhash].js',
+            chunkFilename: common.isDevMode ? '[name].js' : '[name].' + config.buildId + '.js',
         },
     });
 

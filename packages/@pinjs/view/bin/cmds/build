@@ -1,3 +1,25 @@
 #!/usr/bin/env node
+process.env.NODE_ENV = 'production';
+const fs = require('fs');
+const path = require('path');
+const nanoid = require('nanoid/generate');
+const configFile = path.join(process.cwd(), 'config.pin.js');
 
-require('../../libs/build');
+if (!fs.existsSync(configFile)) {
+    throw new Error('Config file not found!');
+}
+
+const config = require(configFile);
+const build = require('../../libs/build');
+
+config.buildId = nanoid('1234567890abcdefghijklmnopqrstuvwxyz', 10);
+
+(async () => {
+    console.log('> Start building production bundles...');
+    console.log('> Creating pages list file...');
+    build.createPagesList(config.namespace, config.pagesDir, config.customPages || []);
+    console.log('> Building server code...');
+    await build.buildServer(config);
+    console.log('> Building client code...');
+    await build.buildClient(config);
+})();

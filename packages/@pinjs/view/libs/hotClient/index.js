@@ -1,4 +1,4 @@
-const uuid = require('uuid/v4');
+const nanoid = require('nanoid')
 const stringify = require('json-stringify-safe');
 const webpackHotClient = require('webpack-hot-client');
 const ParserHelpers = require('webpack/lib/ParserHelpers');
@@ -7,7 +7,7 @@ const getOptions = require('webpack-hot-client/lib/options');
 const logger = require('../logger');
 
 const addEntry = (entry, compilerName, options) => {
-    const clientEntry = [`${__dirname}/client?${compilerName || uuid()}`];
+    const clientEntry = [`${__dirname}/client?${compilerName || nanoid()}`];
     let newEntry = {};
 
     if (!Array.isArray(entry) && typeof entry === 'object') {

@@ -10,7 +10,7 @@ class PageLoader extends React.Component {
     static ErrorPage = null;
 
     static async getPagesMap() {
-        let pagesMapContent = await import(`${PIN_VIEW_DIR}/pages.jsx`);
+        let pagesMapContent = await import(`${PIN_VIEW_DIR}/${PIN_VIEW_NAMESPACE}-pages.jsx`);
         PageLoader.PagesMap = pagesMapContent.default;
         PageLoader.DocumentPage = pagesMapContent._doc || null;
         PageLoader.AppPage = pagesMapContent._app || null;

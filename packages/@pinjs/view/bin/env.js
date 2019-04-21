@@ -2,6 +2,8 @@ const arg = require('arg');
 
 const supportedCommands = [
     'dev',
+    'build',
+    'start',
 ];
 
 const args = arg({
