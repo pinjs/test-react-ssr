@@ -15,9 +15,22 @@
   "dependencies": {
     "@pinjs/view": "file:packages/@pinjs/view",
     "clean-webpack-plugin": "^2.0.1",
+    "extract-css-chunks-webpack-plugin": "^4.3.2",
+    "extracted-loader": "^1.0.7",
+    "find-up": "^3.0.0",
+    "ignore-loader": "^0.1.2",
     "json-stringify-safe": "^5.0.1",
     "koa": "2.7.0",
     "koa-router": "7.4.0",
-    "koa-static": "^5.0.0"
+    "koa-static": "^5.0.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.1",
+    "postcss-loader": "^3.0.0"
+  },
+  "devDependencies": {
+    "css-loader": "^2.1.1",
+    "mini-css-extract-plugin": "^0.6.0",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1"
   }
 }

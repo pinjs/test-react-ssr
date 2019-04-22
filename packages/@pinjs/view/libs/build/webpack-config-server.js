@@ -29,9 +29,9 @@ const getConfigs = config => {
         })],
     });
 
-    webpackConfig.plugins.unshift(new ReactLoadableSSRAddon({
-        filename: path.join(config.serverOutputDir, 'react-loadable-manifest.json'),
-    }));
+    // webpackConfig.plugins.unshift(new ReactLoadableSSRAddon({
+    //     filename: path.join(config.serverOutputDir, 'react-loadable-manifest.json'),
+    // }));
     return webpackConfig;
 }
 

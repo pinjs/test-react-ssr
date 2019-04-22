@@ -6,6 +6,8 @@ const sharedDir = path.join(path.dirname(path.dirname(__dirname)), 'src/shared')
 const componentsDir = path.join(path.dirname(path.dirname(__dirname)), 'src/components');
 const PIN_VIEW_DIR = path.join(process.cwd(), '.pinjs', 'view');
 
+const cssLoaderConfig = require('./css-loader-config');
+
 exports.isDevMode = process.env.NODE_ENV !== 'production';
 exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
     let customPageComponents = (config.customPages || []).map(pageComponent => {
@@ -81,6 +83,7 @@ exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
         },
         plugins: [
             new webpack.DefinePlugin({
+                PUBLIC_PATH: JSON.stringify(config.publicPath),
                 OUTPUT_DIR: JSON.stringify(config.serverOutputDir),
                 PIN_VIEW_DIR: JSON.stringify(PIN_VIEW_DIR),
                 PIN_VIEW_NAMESPACE: JSON.stringify(config.namespace),
@@ -94,7 +97,14 @@ exports.getCommonWebpackConfig = (config, entryIndex, isServer = true) => {
                 dangerouslyAllowCleanPatternsOutsideProject: true,
             }),
         ],
-    }
+    };
+
+    webpackConfig.module.rules.push({
+        test: /\.s(c|a)ss$/,
+        use: cssLoaderConfig(webpackConfig, isServer, {
+            isDev: true
+        })
+    });
 
     return webpackConfig;
 }

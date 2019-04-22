@@ -30,6 +30,11 @@ class SSR {
     static PageMaps = {};
 
     async render(pathname, bundleManifest, devAssets) {
+        let cleanPathName = pathname;
+        cleanPathName[0] == '/' && (cleanPathName = cleanPathName.substring(1));
+        cleanPathName[cleanPathName.lenth - 1] == '/' && (cleanPathName = cleanPathName.substring(0, cleanPathName.length - 1));
+        (!cleanPathName && (cleanPathName = 'index'))
+
         let Page = await PageLoader.getPageComponent(pathname);
         let store = createReduxStore({ server: true });
         let modules = new Set();
@@ -41,6 +46,7 @@ class SSR {
             </Provider>
         );
 
+        let pageAssets = bundleManifest.assets[cleanPathName] || {css: [], js: []};
         let loadedModules = [...bundleManifest.entrypoints, ...Array.from(modules)];
         let initState = store.getState();
         let bundles = getBundles(bundleManifest, loadedModules);
@@ -52,8 +58,8 @@ class SSR {
             `window.__PINJS_PROPS__ = ${JSON.stringify(Page.props || {}).replace(/</g, '\\u003c')}`,
         ];
 
-        (bundles.js || []).map(js => scripts.push(js.publicPath));
-        (bundles.css || []).map(css => styles.push(css.publicPath));
+        (bundles.js || []).concat(pageAssets.js).map(js => scripts.push(js.publicPath));
+        (bundles.css || []).concat(pageAssets.css).map(css => styles.push(css.publicPath));
 
         if (devAssets) {
             styles = devAssets.styles || [];

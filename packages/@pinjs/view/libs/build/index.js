@@ -10,7 +10,7 @@ const webpackConfigClient = require('./webpack-config-client');
 const webpackConfigServer = require('./webpack-config-server');
 const pinViewDir = path.join(process.cwd(), '.pinjs/view');
 
-!fs.existsSync(pinViewDir) && mkdirp(pinViewDir);
+!fs.existsSync(pinViewDir) && mkdirp.sync(pinViewDir);
 
 const createPagesList = (namespace, pagesDir, customPages = []) => {
     if (pagesDir[pagesDir.length - 1] == '/') {
@@ -48,7 +48,7 @@ const createPagesList = (namespace, pagesDir, customPages = []) => {
             loading: () => Loading,
             modules: ['${pageComponent}'],
         })`;
-        pageComponentContent[pathName] = `'${pathName}': ${pageKeyName}`
+        pageComponentContent[pathName] = `'${pathName}': ${pageKeyName}`;
     });
 
     /** Process custom pages */
@@ -138,11 +138,15 @@ const build = async (webpackConfig, label, compiler = null, output = false) => {
             process.stdout.write('\n');
 
             output && process.stdout.write(stats.toString({
+                all: false,
+                modules: true,
+                maxModules: 0,
+                errors: true,
+                warnings: true,
+                // our additional options
+                moduleTrace: true,
+                errorDetails: true,
                 colors: true,
-                modules: false,
-                children: false,
-                chunks: false,
-                chunkModules: false
             }) + '\n\n');
 
             return resolve();
@@ -155,31 +159,25 @@ const transformConfig = config => {
         config = config._view;
     }
 
-    if (!Array.isArray(config)) {
-        config = [config];
-    }
-
     return config;
 }
 
 const buildClient = async (config, compiler) => {
     config = transformConfig(config);
-    for(var i = 0; i < config.length; i++) {
-        let _config = config[i];
-        mkdirp.sync(_config.clientOutputDir);
-        let webpackConfig = webpackConfigClient.getConfigs(_config);
-        await build(webpackConfig, 'Client ' + _config.namespace, compiler, true);
-    }
+    mkdirp.sync(config.clientOutputDir);
+    let webpackConfig = webpackConfigClient.getConfigs(config);
+    config.webpack && (webpackConfig = config.webpack(webpackConfig));
+    config.webpackClient && (webpackConfig = config.webpackClient(webpackConfig));
+    await build(webpackConfig, 'Client ' + config.namespace, compiler, true);
 }
 
 const buildServer = async (config, compiler) => {
     config = transformConfig(config);
-    for(var i = 0; i < config.length; i++) {
-        let _config = config[i];
-        mkdirp.sync(_config.serverOutputDir);
-        let webpackConfig = webpackConfigServer.getConfigs(_config);
-        await build(webpackConfig, 'Server ' + _config.namespace, compiler, true);
-    }
+    mkdirp.sync(config.serverOutputDir);
+    let webpackConfig = webpackConfigServer.getConfigs(config);
+    config.webpack && (webpackConfig = config.webpack(webpackConfig));
+    config.webpackServer && (webpackConfig = config.webpackServer(webpackConfig));
+    await build(webpackConfig, 'Server ' + config.namespace, compiler, true);
 }
 
 const all = async config => {
@@ -191,9 +189,17 @@ const all = async config => {
 }
 
 const getWebpackConfigs = config => {
+    mkdirp.sync(config.serverOutputDir);
+    mkdirp.sync(config.clientOutputDir);
     createPagesList(config.namespace, config.pagesDir, config.customPages || []);
     let webpackClientConfig = webpackConfigClient.getConfigs(config);
     let webpackServerConfig = webpackConfigServer.getConfigs(config);
+
+    config.webpack && (webpackClientConfig = config.webpack(webpackClientConfig));
+    config.webpack && (webpackServerConfig = config.webpack(webpackServerConfig));
+
+    config.webpackClient && (webpackClientConfig = config.webpackClient(webpackClientConfig));
+    config.webpackServer && (webpackServerConfig = config.webpackServer(webpackServerConfig));
 
     return [webpackClientConfig, webpackServerConfig];
 }

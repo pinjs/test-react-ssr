@@ -3,6 +3,9 @@ import Link from '@pinjs/view/link';
 import Head from '@pinjs/view/head';
 import CT1 from './ct1';
 
+import './contact.scss';
+import './contact2.scss';
+
 export default class ContactPage extends React.Component {
     static async getInitialProps() {
         return new Promise(resolve => {

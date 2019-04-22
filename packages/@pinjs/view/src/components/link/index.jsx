@@ -51,6 +51,14 @@ class PinJsViewLink extends React.Component {
         e.preventDefault();
         Router.emit('routeChangeStarted', this.linkObject);
         Router.history.push(this.linkProps.href, Object.assign({}, this.linkObject.params));
+        // let currentPath = window.__PINJS_PATH__.substring(1);
+        // !currentPath && (currentPath = 'index');
+
+        // let currentPageLinkElm = document.querySelector(`link[href^="${PUBLIC_PATH}${currentPath}.css"]`);
+        // let currentPageScriptElm = document.querySelector(`script[src^="${PUBLIC_PATH}${currentPath}.js"]`);
+        // currentPageLinkElm.parentElement.removeChild(currentPageLinkElm);
+        // currentPageScriptElm.parentElement.removeChild(currentPageScriptElm);
+        // window.__PINJS_PATH__ = this.linkObject.params.__page_pathname;
     }
 
     render() {

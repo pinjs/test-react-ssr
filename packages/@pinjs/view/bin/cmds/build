@@ -3,23 +3,27 @@ process.env.NODE_ENV = 'production';
 const fs = require('fs');
 const path = require('path');
 const nanoid = require('nanoid/generate');
+const build = require('../../libs/build');
 const configFile = path.join(process.cwd(), 'config.pin.js');
 
 if (!fs.existsSync(configFile)) {
     throw new Error('Config file not found!');
 }
 
-const config = require(configFile);
-const build = require('../../libs/build');
-
-config.buildId = nanoid('1234567890abcdefghijklmnopqrstuvwxyz', 10);
+let buildIdChars = '1234567890abcdefghijklmnopqrstuvwxyz';
+let config = require(configFile);
+!Array.isArray(config) && (config = [config]);
 
 (async () => {
     console.log('> Start building production bundles...');
-    console.log('> Creating pages list file...');
-    build.createPagesList(config.namespace, config.pagesDir, config.customPages || []);
-    console.log('> Building server code...');
-    await build.buildServer(config);
-    console.log('> Building client code...');
-    await build.buildClient(config);
+    for (var i = 0; i < config.length; i++) {
+        let _config = config[i];
+        _config.buildId = nanoid(buildIdChars, 10);
+        console.log(`> Creating ${_config.namespace} pages list file...`);
+        build.createPagesList(_config.namespace, _config.pagesDir, _config.customPages || []);
+        console.log(`> Building ${_config.namespace} server code...`);
+        await build.buildServer(_config);
+        console.log(`> Building ${_config.namespace} client code...`);
+        await build.buildClient(_config);
+    }
 })();

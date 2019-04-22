@@ -2,6 +2,8 @@ import React from 'react';
 import Link from '@pinjs/view/link';
 import Head from '@pinjs/view/head';
 
+import './home.scss';
+
 export default class HomePage extends React.Component {
     static async getInitialProps() {
         return new Promise(resolve => {

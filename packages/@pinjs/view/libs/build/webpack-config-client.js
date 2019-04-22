@@ -1,8 +1,9 @@
 const path = require('path');
+const ReactLoadableSSRAddon = require('react-loadable-ssr-addon');
 const common = require('./webpack-config-common');
 const entryIndex = path.join(path.dirname(path.dirname(__dirname)), 'src/client');
 
-const getConfigs = config => {
+const getConfigs = (config, entryPoints) => {
     let webpackConfig = Object.assign({}, common.getCommonWebpackConfig(config, entryIndex, false), {
         name: 'client',
         target: 'web',
@@ -26,6 +27,10 @@ const getConfigs = config => {
             },
         }]
     });
+
+    webpackConfig.plugins.unshift(new ReactLoadableSSRAddon({
+        filename: path.join(config.serverOutputDir, 'react-loadable-manifest.json'),
+    }));
 
     return webpackConfig;
 }
